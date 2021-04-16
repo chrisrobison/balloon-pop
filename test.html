@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title></title>
+<style>
+    body {
+        margin:0;
+        padding:0;
+        font-size:14px;
+    }
+    header {
+        background-color:#999;
+        color:#eee;
+        height:5vh;
+    }
+    main {
+        font-family: "Webdings";
+        font-size:24px;
+        background-color:#333;
+        color:#ddd;
+        height:90vh;
+    }
+    footer {
+        background-color:#666;
+        color:#eee;
+        height:5vh;
+    }
+</style>
+</head>
+
+<body id="home">
+    <header>
+    </header>
+    <main>
+    </main>
+    <footer>
+    </footer>
+<script>
+    function $(str) { return document.querySelector(str); }
+    function $$(str) { return document.querySelectorAll(str); }
+
+    (function() {
+        const app = {
+            init: function() {
+                app.state.loaded = true;
+                out = '';
+                for (let i=0; i<512; i++) {
+                    out += `<span title='${i}'>${String.fromCharCode(i)}</span>`;
+                }
+                $("main").innerHTML = out;
+            },
+            state: {
+                loaded: false
+            }
+        }
+        window.app = app;
+        app.init();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+<style>
+body {
+    background: linear-gradient(165deg, #527785 0%, #7FB4C7 100%);
+    margin:0;
+    padding:0;
+}
+
+.cloud-circle, #cloud-circle {
+    width: 600px;
+    height: 275px;
+    border-radius: 50%;
+    filter: url(#filter);
+    box-shadow: 400px 400px 300px 0px #ffffff;
+    position: absolute;
+    top: -500px;
+    left: -340px;
+    transition: all 90s linear;
+/*    background: linear-gradient(to bottom, #ffffff 0%,#ffffff 50%,#e5e5e5 62%,#9b9b9b 100%);*/
+}
+header {
+position:absolute;
+width:100vw;
+
+}
+#cloud-circle { display:block; }
+main {
+    display:block;
+    position:relative;
+    top:0px;
+    left:0px;
+    background-color:#ffff0088;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+}
+#frame {
+    position:absolute;
+    border:5vw solid #00000066;
+    width:90vw;
+    left:0vw;
+    top:0vh;
+    height:85vh;
+    border-top:3vw solid DarkCyan;
+    display:none;
+}
+header {
+    background-color:#eeeeee;
+    z-index:99999;
+}
+label {
+    font-family:"Helvetica Neue", "Helvetica", sans-serif;
+}
+label::after {
+    content: ":";
+}
+</style>
+<link rel='stylesheet' href='sky.css'/>
+    </head>
+<body>
+    <header>
+        <label for='baseFrequency_slider'>Base Frequency</label> <input type='text' size='3' value='.01' id='baseFrequency_value' onchange='app.upFilter($("#morph"), "baseFrequency", this.value)'> <input type='range' id='baseFrequency_slider' min='.01' max='1.00' step='0.005' value='.01' oninput='app.upFilter($("#morph"), "baseFrequency", this.value)' onchange='app.upFilter($("#morph"), "baseFrequency", this.value)'><br>
+        <label for='numOctaves'>Octaves</label> <input type='text' size='3' value='5' id='numOctaves_value'  onchange="app.upFilter($('#morph'), 'numOctaves', this.value)"> <input type='range' id='numOctaves_slider' min='1' max='100' step='1' value='5' onchange="app.upFilter($('#morph'), 'numOctaves', this.value)" oninput="app.upFilter($('#morph'), 'numOctaves', this.value)"><br>
+        <label for='seed'>Seed</label> <input type='text' size='3' value='3' id='seed_value' onchange="app.upFilter($('#morph'), 'seed', this.value)"> <input type='range' id='seed_slider' min='1' max='1000' step='1' value='3' onchange="app.upFilter($('#morph'), 'seed', this.value)" oninput="app.upFilter($('#morph'), 'seed', this.value)"><br>
+    </header>
+    <main>
+      <div id="cloud-circle">
+<svg width="0" height="0"><filter id="filter"><feTurbulence id="morph" type="fractalNoise" seed='2' baseFrequency=".01" numOctaves="5" /><feDisplacementMap in="SourceGraphic" scale="280" /></filter></svg>
+</div>
+    </main>
+    <div id='frame'></div>
+    <script>
+(function() {
+    window.app = app = {
+        upFilter: function(who, attr, val) {
+            who.setAttribute(attr, val);
+            who.setAttribute("width", "0");
+            
+            $("#" + attr + "_slider").value = val;
+            
+            const showval = $("#" + attr + '_value');
+            showval.value = val;
+
+
+        },
+        jiggle: function() {
+            const mycloud = $("#cloud-circle");
+            const morph = $("#morph");
+
+            const newseed = Math.floor(Math.random()*1000) + 1;
+
+            app.upFilter(morph, "seed", newseed);
+            setTimeout(app.jiggle, 100);
+        },
+        main: document.querySelector("main"),
+        init: () => {
+            const main = $("main");
+            let now = new Date();
+            let hour = now.getHours();
+
+            if (hour < 10) { hour = "0" + hour.toString(); }
+            main.classList.add("sky-gradient-" + hour);
+            main.addEventListener("click", function(e) {
+                app.makeCloud();
+            });
+
+            const cloudcount = Math.floor(Math.random()*6) + 1;
+            for (let i=0; i<cloudcount; i++) {
+                app.delayCloud();
+            }
+            // app.jiggle();
+        },
+        delayCloud: function() {
+            setTimeout(function() { app.makeCloud(); }, Math.floor(Math.random() *3000) + 0);
+        },
+        clouds: [],
+        makeCloud: function() {
+            let cloud = document.createElement("div");
+            cloud.className = "cloud-circle";
+            cloud.height = Math.floor(Math.random() * 250) + 50;
+            cloud.width = Math.floor(Math.random() * 500) + 150;
+            
+            const scale = 100; // (Math.floor(Math.random()*18)+180)
+            let cloudSVG = "<svg width=\"0\" height=\"0\"><filter id=\"filter"+app.clouds.length+"\"><feTurbulence id=\"seed"+app.clouds.length+"\" type=\"fractalNoise\" seed=\""+Math.floor(Math.random()*100) +"\" baseFrequency=\".01\" numOctaves=\"20\" /><feDisplacementMap in=\"SourceGraphic\" scale=\""+scale+"\" /></filter></svg>";
+            cloud.innerHTML = cloudSVG;
+            cloud.style.filter = "url(#filter"+app.clouds.length+")";
+            cloud.style.transform = 'translateY(-400px) scale('+(Math.random() + 0.5)+')';
+            cloud.style.left = Math.floor(Math.random()*(window.innerWidth )) - 500 + 'px';
+            cloud.style.top = "-400px";
+            cloud.style.height = cloud.height + 'px';
+            cloud.style.width = cloud.width + 'px';
+
+            cloud.style.transitionDuration = (Math.floor(Math.random()*60)+15)+'s';
+            cloud.ontransitionend = function(e) {
+                /*
+                cloud.parentElement.removeChild(cloud);
+                setTimeout(function() { app.makeCloud(); console.log("Cloud floated out of view. Renmoved and created new cloud."); }, Math.floor(Math.random()*3000) + 500);
+                */
+                cloud.style.transitionDuration = "0ms";
+                console.log("Reset transitionduration");
+                cloud.style.transform = 'translateY(-400px) scale('+(Math.random()+0.5)+')';
+                setTimeout(function() { cloud.style.transform = 'translateY(-400px) scale('+(Math.random()+0.5)+')'; }, 10);
+                console.log("moved cloud offscreen");
+                const newLeft = Math.floor(Math.random()*(window.innerWidth)) - 500;
+                cloud.style.left = newLeft + 'px';
+                console.log("New cloud left: " + newLeft);
+                setTimeout(function() { 
+                    cloud.style.transitionDuration = (Math.floor(Math.random()*60)+15)+'s';
+                    console.log("New transition duration: " + cloud.style.transitionDuration);
+                    cloud.style.transform = "translateY(" + (window.innerHeight + 200) + "px) scale(" + (Math.floor(Math.random()*3)+.25) + ")"; 
+                }, 1000);
+            };
+
+            app.main.append(cloud);
+            setTimeout(function() { cloud.style.transform = "translateY(" + (window.innerHeight + 200) + "px) scale(" + (Math.random()+.5) + ")"; }, 500);
+            //app.clouds.push(cloud);
+        }
+    }
+
+    app.init();
+})();
+function $(str) { return document.querySelector(str); }
+function $$(str) { return document.querySelectorAll(str); }
+
+    </script>
+
+</body>
+</html>

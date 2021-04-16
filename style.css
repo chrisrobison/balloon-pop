@@ -1,0 +1,153 @@
+ body {
+    background-color:#222;
+ }
+ 
+ #scoreboard {
+    position:absolute;
+    z-index:9999;
+    color:#0e0;
+    background-color:rgba(0,0,0,.4);
+    font-size:38px;
+    border-radius: 1rem;
+}
+.boarditem span {
+    display:inline-block;
+    width:4rem;
+    float:right;
+}
+.boarditem {
+    padding:2rem 1rem 1rem 1rem;
+    line-height:.5em;
+    margin:0;
+    top:1rem;
+    left:1rem;
+    text-align:center;
+    font-family: 'Oxanium', cursive;
+ }
+ #main {
+     position:absolute;
+     top:0px;
+     left:0px;
+     width:100%;
+     height:100%;
+     right:0px;
+     bottom:0px;
+     overflow:hidden;
+     user-select:none;
+ /*    background-image:url("park1.jpg"); */
+     background-size:cover;
+ }
+ #balloon {
+ }
+ .balloon {
+    position:absolute;
+    transition: top 30s linear;
+    height:100px;
+    width:80px;
+    opacity:.8;
+ }
+ .explosion {
+    position:absolute;
+    height:600px;
+    width:600px;
+ }
+ .floating { 
+     animation-name: vibrate-1; 
+     animation-duration: 2s; 
+     animation-iteration-count: infinite; 
+     animation-timing-function: linear;
+     filter: drop-shadow(5px 8px 10px rgba(0,0,0,1));
+ } 
+ .explode {
+    animation-name: explosion;
+     animation-duration: 250ms; 
+     animation-timing-function: linear;
+     animation-iteration-count: once; 
+     animation-fill-mode: forwards;
+     transform-origin:center center;
+ }
+ 
+
+ .explosion .particle {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 10%;
+      animation: pop 1000ms reverse forwards;
+      animation-timing-function: cubic-bezier(0.600, 0.040, 0.980, 0.335);
+ }
+
+ @keyframes pop {
+    from {
+        opacity: 0;
+        height:0px;
+        width:0px;
+    }
+    to {
+        top: 50%;
+        left: 50%;
+        opacity: 1;
+    }
+ }
+
+ /**
+ * ----------------------------------------
+ * animation vibrate-1
+ * ----------------------------------------
+ */
+ @-webkit-keyframes vibrate-1 {
+ 0% {
+ -webkit-transform: translate(0);
+ transform: translate(0);
+ }
+ 20% {
+ -webkit-transform: translate(-2px, 2px);
+ transform: translate(-2px, 2px);
+ }
+ 40% {
+ -webkit-transform: translate(-2px, -2px);
+ transform: translate(-2px, -2px);
+ }
+ 60% {
+ -webkit-transform: translate(2px, 2px);
+ transform: translate(2px, 2px);
+ }
+ 80% {
+ -webkit-transform: translate(2px, -2px);
+ transform: translate(2px, -2px);
+ }
+ 100% {
+ -webkit-transform: translate(0);
+ transform: translate(0);
+ }
+ }
+ @keyframes vibrate-1 {
+ 0% {
+ -webkit-transform: translate(0);
+ transform: translate(0);
+ }
+ 20% {
+ -webkit-transform: translate(-2px, 2px);
+ transform: translate(-2px, 2px);
+ }
+ 40% {
+ -webkit-transform: translate(-2px, -2px);
+ transform: translate(-2px, -2px);
+ }
+ 60% {
+ -webkit-transform: translate(2px, 2px);
+ transform: translate(2px, 2px);
+ }
+ 80% {
+ -webkit-transform: translate(2px, -2px);
+ transform: translate(2px, -2px);
+ }
+ 100% {
+ -webkit-transform: translate(0);
+ transform: translate(0);
+ }
+ }
+ @keyframes floating { 
+ 0% { motion-offset:0%; offset-distance:0%; }
+ 100% { motion-offset:100%; offset-distance:100%; }
+ } 

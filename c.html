@@ -1,0 +1,64 @@
+<style>
+    font-size: 18px;
+    --color-text: #111;
+    --color-number: #999;
+    --color-bg: #fff;
+    --color-link: #1352d1;
+    --color-link-hover: #111;
+    color: var(--color-text);
+    font-family: tenon,
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    --cda-position: fixed;
+    --cda-width: 280px;
+    --cda-height: auto;
+    --cda-left: 3rem;
+    --cda-right: auto;
+    --cda-top: auto;
+    --cda-bottom: 3rem;
+    --cda-background: transparent;
+    --cda-border-width: 0;
+    --cda-border-color: transparent;
+    --cda-text-color: var(--color-link);
+    --cda-text-color-hover: var(--color-link-hover);
+    --cda-text-weight: inherit;
+    --cda-text-size: inherit;
+    --cda-text-align: left;
+    --footer-align: start;
+    --cda-footer-color: var(--color-link);
+    --cda-footer-color-hover: var(--color-link-hover);
+    --cda-padding: 0;
+    --cda-footer-fontsize: 0.95rem;
+    list-style: none;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    counter-increment: itemcounter;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+</style>
+<button class="button button--surtur">
+    <svg class="textcircle" viewBox="0 0 500 500">
+        <title>Projects &amp; client work 2020</title>
+        <defs>
+            <path id="textcircle" d="M250,400 a150,150 0 0,1 0,-300a150,150 0 0,1 0,300Z"></path>
+        </defs>
+        <text>
+            <textPath xlink:href="#textcircle" aria-label="Projects &amp; client work 2020" textLength="900">Projects &amp; client work 2020</textPath>
+        </text>
+    </svg>
+    <svg aria-hidden="true" class="eye" width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+        <path class="eye__outer" d="M10.5 35.308c5.227-7.98 14.248-13.252 24.5-13.252s19.273 5.271 24.5 13.252c-5.227 7.98-14.248 13.253-24.5 13.253s-19.273-5.272-24.5-13.253z"></path>
+        <path class="eye__lashes-up" d="M35 8.802v8.836M49.537 11.383l-3.31 8.192M20.522 11.684l3.31 8.192"></path>
+        <path class="eye__lashes-down" d="M35 61.818v-8.836 8.836zM49.537 59.237l-3.31-8.193 3.31 8.193zM20.522 58.936l3.31-8.193-3.31 8.193z"></path>
+        <circle class="eye__iris" cx="35" cy="35.31" r="5.221"></circle>
+        <circle class="eye__inner" cx="35" cy="35.31" r="10.041"></circle>
+    </svg>
+</button>

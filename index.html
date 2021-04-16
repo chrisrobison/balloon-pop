@@ -1,0 +1,838 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, 
+    user-scalable=no, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #fff;
+        }
+
+        #confetti {
+            display: inline-block;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            bottom: 0px;
+            right: 0px;
+            width: 100%;
+            height: 100%;
+            background-color: #0000;
+        }
+
+        main {
+            position: relative;
+            text-align: center;
+            margin: 0 auto;
+        }
+    </style>
+
+</head>
+
+<body>
+    <main>
+        <canvas></canvas>
+        <canvas id='confetti'></canvas>
+    </main>
+    <script>
+        function $(str) {
+            return document.querySelector(str);
+        }
+
+        function $$(str) {
+            return document.querySelectorAll(str);
+        }
+        // http://paulirish.com/2011/requestanimationframe-for-smart-animating
+        // shim layer with setTimeout fallback
+        window.requestAnimFrame = (function() {
+            return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
+                function(callback) {
+                    window.setTimeout(callback, 1000 / 60);
+                };
+        })();
+
+        const colors = {
+            green: {
+                front: '#3b870a',
+                back: '#235106',
+                color: 'green'
+            },
+            yellow: {
+                front: '#b9b900',
+                back: '#6f6f00',
+                color: 'yellow'
+            },
+            red: {
+                front: '#e23d34',
+                back: '#88251f',
+                color: 'red'
+            },
+            pink: {
+                front: '#cd3168',
+                back: '#7b1d3e',
+                color: 'pink'
+            },
+            mylar: {
+                front: '#eeeeee',
+                back: '#dddddd',
+                color: 'mylar'
+            },
+            blue: {
+                front: '#394f78',
+                back: '#222f48',
+                color: 'blue'
+            },
+            sky: {
+                front: '#008a8a',
+                back: '#005353',
+                color: 'sky'
+            },
+            heart: {
+                front: '#cc0000',
+                back: '#990000',
+                color: 'darkred'
+            }
+        };
+
+        const colorlist = ['blue', 'green', 'pink', 'red', 'sky', 'yellow', 'mylar', 'heart'];
+
+
+        // namespace our game
+        var POP = {
+            level: 1,
+            WIDTH: 320,
+            HEIGHT: 480,
+            scale: 1,
+            
+            // Position of the canvas in relation to the screen
+            offset: {
+                top: 0,
+                left: 0
+            },
+            // Place to store all balloons, touches, particles etc
+            entities: [],
+            
+            // Game ticks until we spawn a balloon
+            nextBalloon: 60,
+            // for tracking player's progress
+            score: {
+                taps: 0,
+                hit: 0,
+                escaped: 0,
+                accuracy: 0
+            },
+            // we'll set the rest of these
+            // in the init function
+            RATIO: null,
+            clouds: [],
+            currentWidth: null,
+            currentHeight: null,
+            canvas: null,
+            ctx: null,
+            ua: null,
+            android: null,
+            ios: null,
+            sky: [ [{ "offset": 0, "color": "#00000c" }, { "color": "#000000", "offset": 1 }], [{ "color": "#020111", "offset": .85 }, { "color": "#191621", "offset": 1 }], [{ "color": "#020111", "offset": .6 }, { "color": "#20202c", "offset": 1 }], [{ "color": "#020111", "offset": .1 }, { "color": "#3a3a52", "offset": 1 }], [{ "color": "#20202c", "offset": 0 }, { "color": "#515175", "offset": 1 }], [{ "color": "#40405c", "offset": 0 }, { "color": "#6f71aa", "offset": .8 }, { "color": "#8a76ab", "offset": 1 }], [{ "color": "#4a4969", "offset": 0 }, { "color": "#7072ab", "offset": .5 }, { "color": "#cd82a0", "offset": 1 }], [{ "color": "#757abf", "offset": 0 }, { "color": "#8583be", "offset": .6 }, { "color": "#eab0d1", "offset": 1 }], [{ "color": "#82addb", "offset": 0 }, { "color": "#ebb2b1", "offset": 1 }], [{ "color": "#94c5f8", "offset": 1 }, { "color": "#a6e6ff", "offset": .7 }, { "color": "#b1b5ea", "offset": 1 }], [{ "color": "#b7eaff", "offset": 0 }, { "color": "#94dfff", "offset": 1 }], [{ "color": "#9be2fe", "offset": 0 }, { "color": "#67d1fb", "offset": 1 }], [{ "color": "#90dffe", "offset": 0 }, { "color": "#38a3d1", "offset": 1 }], [{ "color": "#57c1eb", "offset": 0 }, { "color": "#246fa8", "offset": 1 }], [{ "color": "#2d91c2", "offset": 0 }, { "color": "#1e528e", "offset": 1 }], [{ "color": "#2473ab", "offset": 0 }, { "color": "#1e528e", "offset": .7 }, { "color": "#5b7983", "offset": 1 }], [{ "color": "#1e528e", "offset": 0 }, { "color": "#265889", "offset": .5 }, { "color": "#9da671", "offset": 1 }], [{ "color": "#1e528e", "offset": 0 }, { "color": "#728a7c", "offset": .5 }, { "color": "#e9ce5d", "offset": 1 }], [{ "color": "#154277", "offset": 0 }, { "color": "#576e71", "offset": .3 }, { "color": "#e1c45e", "offset": .7 }, { "color": "#b26339", "offset": 1 }], [{ "color": "#163C52", "offset": 0 }, { "color": "#4f4f47", "offset": .3 }, { "color": "#c5752d", "offset": .6 }, { "color": "#b7490f", "offset": .8 }, { "color": "#2F1107", "offset": 1 }], [{ "color": "#071b26", "offset": 0 }, { "color": "#071B26", "offset": .3 }, { "color": "#8a3b12", "offset": .8, }, { "color": "#240e03", "offset": 1 }], [{ "color": "#010a10", "offset": .3 }, { "color": "#59230B", "offset": .8 }, { "color": "#2F1107", "offset": 1 }], [{ "color": "#090401", "offset": .5 }, { "color": "#4b1d06", "offset": 1 }], [{ "color": "#00000c", "offset": .8 }, { "color": "#150800", "offset": 1 }] ], 
+            
+            init: function() {
+                POP.CLOUD = new Image();
+                POP.CLOUD.src = "cloud2.png";
+
+                POP.paused = 0;
+
+                // the proportion of width to height
+                POP.RATIO = POP.WIDTH / POP.HEIGHT;
+                // these will change when the screen is resize
+                POP.currentWidth = POP.WIDTH;
+                POP.currentHeight = POP.HEIGHT;
+                // this is our canvas element
+                POP.canvas = document.querySelectorAll('canvas')[0];
+                POP.confetti = document.querySelector('#confetti');
+
+                POP.canvas.width = POP.WIDTH;
+                POP.canvas.height = POP.HEIGHT;
+
+                POP.confetti.width = POP.WIDTH;
+                POP.confetti.height = POP.HEIGHT;
+
+                POP.ctx = POP.canvas.getContext('2d');
+
+
+                POP.bggrad = POP.ctx.createLinearGradient(0, 0, window.innerHeight * POP.RATIO, window.innerHeight);
+
+                // set background gradient based on hour of day
+                let currentGradient = POP.sky[new Date().getHours()];
+
+                //currentGradient = POP.sky[12];  // <-- uncomment to always be noon
+                currentGradient.forEach(item => POP.bggrad.addColorStop(item.offset, item.color));
+
+                // log android, ios & useragent environments so we know if we need to
+                // hide the address bar in the resize function
+                POP.ua = navigator.userAgent.toLowerCase();
+                POP.android = POP.ua.indexOf('android') > -1 ? true : false;
+                POP.ios = (POP.ua.indexOf('iphone') > -1 || POP.ua.indexOf('ipad') > -1) ? true : false;
+
+                POP.balloons = [];
+
+                for (let i = 0; i < colorlist.length; i++) {
+                    POP.balloons[i] = new Image();
+                    POP.balloons[i].src = `assets/balloon_${colorlist[i]}.png`;
+                    POP.balloons[i].onload = function(e) {
+                        console.log(`Loaded ${colorlist[i]} balloon.`);
+                        if (i == colorlist.length - 1) {
+                            POP.loop();
+                        }
+                    };
+                }
+
+                for (let i = 0; i < 2 + POP.level; i++) {
+                    POP.clouds.push(new POP.Cloud());
+                }
+
+                // set up our wire effect
+                // basically, a series of overlapping circles
+                // across the top of screen
+                POP.wire = {
+                    x: -50, // x coord of first circle
+                    y: -400, // y coord of first circle
+                    r: 400, // circle radius
+                    time: 0, // we'll use this in calculating the sine wire
+                    offset: 200 // this will be the sine wire offset
+                };
+                // calculate how many circles we need to 
+                // cover the screen width
+                POP.wire.total = Math.ceil(POP.WIDTH / POP.wire.r) + 1;
+
+                // listen for clicks
+                window.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (POP.paused) {
+                        POP.paused = 0;
+                        POP.loop();
+                    } else {
+                        POP.Input.set(e);
+                    }
+                }, false);
+
+                // listen for touches
+                window.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    POP.Input.set(e.touches[0]);
+                }, false);
+                
+                // Prevent scroll and zoom
+                window.addEventListener('touchmove', function(e) { e.preventDefault(); }, false);
+                window.addEventListener('touchend', function(e) { e.preventDefault(); }, false);
+
+                // we're ready to resize
+                POP.resize();
+                setupCanvas();
+                // POP.loop();
+
+            },
+
+
+            resize: function() {
+                $("main").style.height = window.innerHeight + 'px';
+                $("main").style.width = window.innerHeight * POP.RATIO + 'px';
+
+                POP.currentHeight = window.innerHeight;
+                POP.currentWidth = POP.currentHeight * POP.RATIO;
+
+                // this will create some extra space on the
+                // page, allowing us to scroll pass
+                // the address bar, and thus hide it.
+                if (POP.android || POP.ios) {
+                    document.body.style.height = (window.innerHeight + 50) + 'px';
+                }
+
+                // set the new canvas style width & height
+                // note: our canvas is still 320x480 but
+                // we're essentially scaling it with CSS
+                POP.canvas.style.width = POP.currentWidth + 'px';
+                POP.canvas.style.height = POP.currentHeight + 'px';
+
+                // the amount by which the css resized canvas
+                // is different to the actual (480x320) size.
+                POP.scale = POP.currentWidth / POP.WIDTH;
+                // position of canvas in relation to
+                // the screen
+                POP.offset.top = POP.canvas.offsetTop;
+                POP.offset.left = POP.canvas.offsetLeft;
+
+                // we use a timeout here as some mobile
+                // browsers won't scroll if there is not
+                // a small delay
+                window.setTimeout(function() {
+                    window.scrollTo(0, 1);
+                }, 1);
+            },
+
+            // this is where all entities will be moved
+            // and checked for collisions etc
+            update: function() {
+                var i,
+                    checkCollision = false; // we only need to check for a collision
+                // if the user tapped on this game tick
+
+
+                // decrease our nextBalloon counter
+                POP.nextBalloon -= 1;
+
+                // if the counter is less than 2 (was 0) 
+                if (POP.nextBalloon < POP.level) {
+                    // put a new instance of balloon into our entities array
+                    POP.entities.push(new POP.Balloon());
+                    // reset the counter with a random value
+                    POP.nextBalloon = (Math.random() * 100) + 100;
+                }
+
+                // Handle touch events 
+                if (POP.Input.tapped) {
+                    if (POP.collides({x: 300, y: 40, r: 20}, {x:POP.Input.x, y:POP.Input.y, r: 7})) {
+                        POP.paused ^= 1;
+                        POP.Input.tapped = false;
+                    } else {
+                        POP.score.taps += 1;
+                        POP.entities.push(new POP.Touch(POP.Input.x, POP.Input.y));
+                        POP.Input.tapped = false;
+                        checkCollision = true;
+                    }
+                }
+
+                POP.clouds.forEach((item, i) => {
+                    item.update();
+                    if (item.remove) {
+                        console.log(`Removing cloud ${i}`);
+                        POP.clouds.splice(i, 1);
+                        POP.clouds.push(new POP.Cloud());
+                    }
+                });
+
+                // cycle through all entities and update as necessary
+                for (i = 0; i < POP.entities.length; i += 1) {
+                    POP.entities[i].update();
+
+                    if (POP.entities[i].type === 'balloon' && checkCollision) {
+                        hit = POP.collides(POP.entities[i], {
+                            x: POP.Input.x,
+                            y: POP.Input.y,
+                            r: 7
+                        });
+                        if (hit) {
+                            addConfetti({
+                                x: POP.Input.x,
+                                y: POP.Input.y,
+                                color: POP.entities[i].color
+                            });
+
+                            POP.score.hit += 1;
+                        }
+
+                        POP.entities[i].remove = hit;
+                    }
+
+                    // delete from array if remove property
+                    // flag is set to true
+                    if (POP.entities[i].remove) {
+                        POP.entities.splice(i, 1);
+                    }
+                }
+
+                // update wire offset
+                // feel free to play with these values for
+                // either slower or faster wires
+                //POP.wire.time = new Date().getTime() * 0.002;
+                //POP.wire.offset = Math.sin(POP.wire.time * 0.8) * 5;
+
+                // calculate accuracy
+                POP.score.accuracy = (POP.score.hit / POP.score.taps) * 100;
+                POP.score.accuracy = isNaN(POP.score.accuracy) ? 0 : ~~(POP.score.accuracy); // a handy way to round floats
+
+            },
+
+
+            // this is where we draw all the entities
+            render: function() {
+
+                let i;
+
+                POP.Draw.rect(0, 0, POP.WIDTH, POP.HEIGHT, POP.bggrad);
+
+                for (i = 0; i < POP.clouds.length; i++) {
+                    POP.clouds[i].render();
+                }
+
+                // display snazzy wire effect
+                for (i = 0; i < POP.wire.total; i++) {
+                    POP.Draw.wire(
+                        POP.wire.x + POP.wire.offset + (i * (POP.wire.r * 1.6)),
+                        POP.wire.y + (POP.wire.y * i),
+                        POP.wire.r,
+                        '#fff');
+                }
+
+                // cycle through all entities and render to canvas
+                for (i = 0; i < POP.entities.length; i += 1) {
+                    POP.entities[i].render();
+                }
+
+                POP.ctx.fillStyle = "#00000066";
+                POP.ctx.fillRect(15, 15, 120, 70);
+
+                // display scores
+                POP.Draw.text('Hit: ' + POP.score.hit, 20, 30, 14, '#fff');
+                POP.Draw.text('Escaped: ' + POP.score.escaped, 20, 50, 14, '#fff');
+                POP.Draw.text('Accuracy: ' + POP.score.accuracy + '%', 20, 70, 14, '#fff');
+                if (POP.paused) {
+                    POP.Draw.text(String.fromCharCode(52), 260, 60, 64, '#fff', "Webdings");
+                } else {
+                    POP.Draw.text(String.fromCharCode(59), 260, 60, 64, '#fff', "Webdings");
+                }
+
+            },
+
+
+            // the actual loop
+            // requests animation frame
+            // then proceeds to update
+            // and render
+            loop: function() {
+                if (!POP.paused) {
+                    requestAnimFrame(POP.loop);
+
+                    POP.update();
+                    POP.render();
+                }
+            }
+
+
+        };
+
+        // checks if two entities are touching
+        POP.collides = function(a, b) {
+
+            var distance_squared = (((a.x - b.x) * (a.x - b.x)) +
+                ((a.y - b.y) * (a.y - b.y)));
+
+            var radii_squared = (a.r + b.r) * (a.r + b.r);
+
+            if (distance_squared < radii_squared) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+
+        // abstracts various canvas operations into
+        // standalone functions
+        POP.Draw = {
+
+            clear: function() {
+                POP.ctx.clearRect(0, 0, POP.WIDTH, POP.HEIGHT);
+            },
+
+
+            rect: function(x, y, w, h, col) {
+                POP.ctx.fillStyle = col;
+                POP.ctx.fillRect(x, y, w, h);
+                //POP.ctx.drawImage(POP.CLOUD, 100, 100, 300, 200);
+            },
+
+            circle: function(x, y, r, col) {
+                POP.ctx.fillStyle = col;
+                POP.ctx.beginPath();
+                POP.ctx.arc(x + 5, y + 5, r, 0, Math.PI * 2, true);
+                POP.ctx.closePath();
+                POP.ctx.fill();
+            },
+
+            wire: function(x, y, r, col) {
+                POP.ctx.fillStyle = col;
+                POP.ctx.beginPath();
+                POP.ctx.lineWidth = 1;
+                POP.ctx.arc(x + 5, y + 50, r, Math.PI / 1.25, Math.PI / 5, true);
+                POP.ctx.stroke();
+            },
+
+            text: function(string, x, y, size, col, font="Monospace") {
+
+                POP.ctx.font = `${size}px ${font}`;
+                POP.ctx.fillStyle = "#000000";
+                POP.ctx.fillText(string, x + 1, y + 1);
+
+                POP.ctx.fillStyle = col;
+                POP.ctx.fillText(string, x, y);
+            }
+
+        };
+
+
+
+        POP.Input = {
+
+            x: 0,
+            y: 0,
+            tapped: false,
+
+            set: function(data) {
+                this.x = (data.offsetX - POP.offset.left) / POP.scale;
+                this.y = (data.pageY - POP.offset.top) / POP.scale;
+                this.tapped = true;
+
+            }
+
+        };
+
+        POP.Touch = function(x, y) {
+
+            this.type = 'touch'; // we'll need this later
+            this.x = x; // the x coordinate
+            this.y = y; // the y coordinate
+            this.r = 5; // the radius
+            this.opacity = 1; // initial opacity. the dot will fade out
+            this.fade = 0.05; // amount by which to fade on each game tick
+            // this.remove = false;    // flag for removing this entity. POP.update
+            // will take care of this
+
+            this.update = function() {
+                // reduce the opacity accordingly
+                this.opacity -= this.fade;
+                // if opacity if 0 or less, flag for removal
+                this.remove = (this.opacity < 0) ? true : false;
+            };
+
+            this.render = function() {
+                POP.Draw.circle(this.x, this.y, this.r, 'rgba(255,255,255,' + this.opacity + ')');
+            };
+
+        };
+
+        POP.Cloud = function() {
+            this.rand = Math.random();
+            this.width = ~~(this.rand * 300) + 150;
+            this.height = ~~(this.width * 0.66666);
+            this.x = -this.width;
+            this.y = ~~(Math.random() * (POP.HEIGHT - this.height));
+            this.velX = Math.random() * Math.random();
+            this.velY = 0;
+
+            this.update = function() {
+                this.x += this.velX;
+                this.y += this.velY;
+
+                this.remove = ((this.x > POP.WIDTH) || (this.y > POP.HEIGHT) || (this.x < -this.width) || (this.y < -this.height)) ? true : false;
+            };
+
+            this.render = function() {
+                POP.ctx.save();
+                POP.ctx.globalAlpha = 0.6;
+                POP.ctx.drawImage(POP.CLOUD, this.x, this.y, this.width, this.height);
+                POP.ctx.restore();
+            };
+        };
+
+        POP.Balloon = function() {
+            this.type = 'balloon';
+            this.r = (Math.random() * 20) + (20 / POP.level);
+            this.speed = (Math.random() * 2) + .25;
+            this.rando = Math.floor(Math.random() * colorlist.length);
+            this.color = colorlist[this.rando];
+            this.basecolor = colorlist[this.rando];
+            this.x = ~~(Math.random() * (POP.WIDTH - (this.r * 2)) + this.r);
+            this.y = ~~(POP.HEIGHT + (Math.random() * 100) + 100);
+
+            console.log(`New balloon with color ${this.basecolor}`);
+
+            // the amount by which the balloon
+            // will move from side to side
+            this.wireSize = Math.floor(Math.random() * 5) + (this.r / 2);
+            // we need to remember the original
+            // x position for our sine wire calculation
+            this.xConstant = this.x;
+
+            this.remove = false;
+            // this.image = POP.balloons[Math.floor(Math.random() * POP.balloons.length)];
+            this.image = POP.balloons[this.rando];
+
+            this.update = function() {
+
+                // a sine wire is commonly a function of time
+                var time = new Date().getTime() * 0.002;
+
+                this.y -= this.speed;
+                // the x coord to follow a sine wire
+                this.x = this.wireSize * Math.sin(time) + this.xConstant;
+
+                // if offscreen flag for removal
+                if (this.y < -10) {
+                    POP.score.escaped += 1; // update score
+                    this.remove = true;
+                }
+
+            };
+
+            this.render = function() {
+
+                POP.ctx.save();
+                POP.ctx.globalAlpha = 0.8;
+                //                POP.Draw.circle(this.x, this.y, this.r, this.color);
+                POP.ctx.drawImage(this.image, 0, 0, 341, 443, this.x - this.r + 5, this.y - this.r + 5, this.r * 2, ((this.r * 2) / 341) * 443);
+                POP.ctx.restore();
+            };
+
+        };
+
+        POP.Particle = function(x, y, r, col) {
+
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            this.col = col;
+
+            // determines whether particle will
+            // travel to the right of left
+            // 50% chance of either happening
+            this.dirX = (Math.random() * 2 > 1) ? 1 : -1;
+            this.dirY = (Math.random() * 2 > 1) ? 1 : -1;
+
+            // random values so particles do no
+            // travel at the same speeds
+            this.vx = ~~(Math.random() * 4) * this.dirX;
+            this.vy = ~~(Math.random() * 4) * this.dirY;
+
+            this.remove = false;
+
+            this.update = function() {
+
+                // update coordinates
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // increase velocity so particle
+                // accelerates off screen
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+
+                // adding this negative amount to the
+                // y velocity exerts an upward pull on
+                // the particle, as if drawn to the
+                // surface
+                //                this.vy += 0.05;
+
+                this.r = (this.r > 0.05) ? this.r - 0.05 : 0;
+
+                // offscreen
+                if ((!this.r) || (this.y < 0) || (this.y > POP.currentHeight)) {
+                    this.remove = true;
+                }
+
+            };
+
+
+            this.render = function() {
+                POP.Draw.circle(this.x, this.y, this.r, this.col);
+            };
+
+        };
+
+        window.addEventListener('load', POP.init, false);
+        window.addEventListener('resize', POP.resize, false);
+    </script>
+    <script>
+        // helper
+        rand = (min, max) => Math.random() * (max - min) + min;
+
+        // params to play with
+        const confettiParams = {
+            // number of confetti per "explosion"
+            number: 40,
+            // min and max size for each rectangle
+            size: {
+                x: [3, 20],
+                y: [3, 20]
+            },
+            // power of explosion
+            initSpeed: 20,
+            // defines how fast particles go down after blast-off
+            gravity: 0.65,
+            // how wide is explosion
+            drag: 0.08,
+            // how slow particles are falling
+            terminalVelocity: 6,
+            // how fast particles are rotating around themselves
+            flipSpeed: 0.027,
+        };
+
+        // const colors = [{ front: '#3B870A', back: '#235106', color: 'green' }, { front: '#B96300', back: '#6f3b00', color: 'orange' }, { front: '#E23D34', back: '#88251f', color: 'red' }, { front: '#CD3168', back: '#7b1d3e', color: 'purple' }, { front: '#664E8B', back: '#3d2f53', color: 'violet' }, { front: '#394F78', back: '#222f48', color: 'blue' }, { front: '#008A8A', back: '#005353', color: 'cyan' }, ];
+
+        // Confetti constructor
+        function Conf(color) {
+            this.randomModifier = rand(-1, 1);
+
+            if (!color) {
+                color = colorlist[Math.floor(rand(0, colorlist.length))];
+            }
+
+            this.colorPair = colors[color];
+            this.dimensions = {
+                x: rand(confettiParams.size.x[0], confettiParams.size.x[1]),
+                y: rand(confettiParams.size.y[0], confettiParams.size.y[1]),
+            };
+            this.position = {
+                x: clickPosition[0],
+                y: clickPosition[1]
+            };
+            this.rotation = rand(0, 2 * Math.PI);
+            this.scale = {
+                x: 1,
+                y: 1
+            };
+            this.velocity = {
+                x: rand(-confettiParams.initSpeed, confettiParams.initSpeed) * 0.4,
+                y: rand(-confettiParams.initSpeed, confettiParams.initSpeed)
+            };
+            this.flipSpeed = rand(0.2, 1.5) * confettiParams.flipSpeed;
+
+            if (this.position.y <= container.h) {
+                this.velocity.y = -Math.abs(this.velocity.y);
+            }
+
+            this.terminalVelocity = rand(1, 1.5) * confettiParams.terminalVelocity;
+
+            this.update = function() {
+                this.velocity.x *= 0.98;
+                this.position.x += this.velocity.x;
+
+                this.velocity.y += (this.randomModifier * confettiParams.drag);
+                this.velocity.y += confettiParams.gravity;
+                this.velocity.y = Math.min(this.velocity.y, this.terminalVelocity);
+                this.position.y += this.velocity.y;
+
+                this.scale.y = Math.cos((this.position.y + this.randomModifier) * this.flipSpeed);
+                this.color = this.scale.y > 0 ? this.colorPair.front : this.colorPair.back;
+            }
+        }
+
+        function updateConfetti() {
+            confettiCtx.clearRect(0, 0, POP.WIDTH, POP.HEIGHT);
+
+            confettiElements.forEach((c, i) => {
+                c.update();
+                confettiCtx.translate(c.position.x, c.position.y);
+                confettiCtx.rotate(c.rotation);
+                const width = (c.dimensions.x * c.scale.x);
+                const height = (c.dimensions.y * c.scale.y);
+                confettiCtx.fillStyle = c.color;
+                confettiCtx.fillRect(-0.5 * width, -0.5 * height, width, height);
+                c.dimensions.x -= 0.125;
+                c.dimensions.y -= 0.125;
+
+                if ((c.dimensions.x < 0) || (c.dimensions.y < 0)) {
+                    confettiElements.splice(i, 1);
+                }
+                confettiCtx.setTransform(1, 0, 0, 1, 0, 0)
+            });
+            /*
+                confettiElements.forEach((c, idx) => {
+                    if (c.position.y > container.h ||
+                        c.position.x < -0.5 * container.x ||
+                        c.position.x > 1.5 * container.x) {
+                        confettiElements.splice(idx, 1)
+
+                    }
+                });
+            */
+            if (confettiElements.length) window.requestAnimationFrame(updateConfetti);
+        }
+        let container, confettiCtx;
+
+        function setupCanvas() {
+            confettiCtx = $("#confetti").getContext('2d');
+            POP.confetti.style.width = POP.currentWidth + 'px';
+            POP.confetti.style.height = POP.currentHeight + 'px';
+
+            /*
+            $("#confetti").height = window.innerHeight;
+            $("#confetti").width = window.innerHeight * POP.RATIO;
+
+            $("#confetti").style.height = window.innerHeight + 'px';
+            $("#confetti").style.width = window.innerHeight * POP.RATIO + 'px';
+            */
+            const box = $("#confetti").getBoundingClientRect();
+
+            container = {
+                x: box.left,
+                y: box.top,
+                w: POP.WIDTH,
+                h: POP.HEIGHT
+            };
+
+            /*
+            container = {
+                w: confetti.clientWidth,
+                h: confetti.clientHeight
+            };
+            */
+        }
+
+        let confettiElements = [];
+
+        function addConfetti(e) {
+            const canvasBox = confetti.getBoundingClientRect();
+            let color = "red";
+            if (e) {
+                if (e.clientX) {
+                    clickPosition = [
+                        e.clientX - canvasBox.left,
+                        e.clientY - canvasBox.top
+                    ];
+                } else if (e.x) {
+                    clickPosition = [e.x, e.y];
+                }
+                if (e.color) {
+                    color = e.color;
+                }
+            } else {
+                clickPosition = [
+                    POP.WIDTH * Math.random(),
+                    POP.HEIGHT * Math.random()
+                ];
+            }
+            for (let i = 0; i < confettiParams.number; i++) {
+                confettiElements.push(new Conf(color))
+            }
+            window.requestAnimationFrame(updateConfetti);
+        }
+
+        function hideConfetti() {
+            confettiElements = [];
+            window.cancelAnimationFrame(updateConfetti)
+        }
+
+        // confettiLoop();
+        function confettiLoop() {
+            addConfetti();
+            setTimeout(confettiLoop, 700 + Math.random() * 1700);
+        }
+    </script>
+</body>
+
+</html>

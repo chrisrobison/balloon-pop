@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>
+      </title>
+      <link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+      <link rel='stylesheet' href='style.css'/>
+   </head>
+   <body>
+       <!--video playsinline autoplay muted loop poster="videos/Cloud1.jpg" id="bgvid">
+            <source src="videos/Cloud1.webm" type="video/webm">
+            <source src="videos/Cloud1.mp4" type="video/mp4">
+       </video-->
+       <div id='main'>
+       </div>
+       <div id='scoreboard'>
+           <div class='boarditem'>LEVEL: <span id='level'>1</span></div>
+           <div class='boarditem'>SCORE: <span id='score'>0</span></div>
+        </div>
+           
+    <script>
+(function() {
+    const cdr = {
+        score: 0,
+        board: document.querySelector("#main"),
+        init: function() {
+            for (var i=0; i < 10; i++) {
+                setTimeout(function() { cdr.makeBalloon(cdr.rand(80,window.innerWidth-80)); }, cdr.rand(i*1000, (i*10000)));
+            }
+            cdr.board.addEventListener("click", function(evt) {
+                cdr.makeBalloon(evt.clientX, evt.clientY);
+                
+            });
+        },
+        balloons: [],
+        explosions: [],
+        colors: [ 
+            {
+                cssfilter: 'hue-rotate(45deg) saturate(1.5)', 
+                color: "#00cc00",
+                name: "green"
+            }, {
+                cssfilter: 'hue-rotate(170deg) saturate(8)', 
+                color: "#25d4e9",
+                name: "cyan"
+            }, {
+                cssfilter: 'hue-rotate(182deg) saturate(15)', 
+                color: "#0000aa",
+                name: "blue"
+            }, {
+                cssfilter: 'hue-rotate(190deg) saturate(15)',
+                color: "pink",
+                name: "#c859ea"
+            }, {
+                cssfilter: 'hue-rotate(290deg) saturate(8)', 
+                color: "#cc0000",
+                name: "red"
+            }, {
+                cssfilter: 'hue-rotate(180deg) saturate(25)',
+                color: "#0d34f2",
+                name: "purple"
+            }
+        ],
+        getBalloon: function(id) {
+            for (var i in cdr.balloons) {
+                if (cdr.balloons[i].id == id) {
+                    return cdr.balloons[i];
+                }
+            }
+            return false;
+        },
+        makeBalloon: function(x, y) {
+            const newBalloon = new Image();
+            newBalloon.src = "cdr-balloon.svg";
+            newBalloon.className = "balloon floating";
+            newBalloon.id = 'balloon_' + cdr.balloons.length;
+            
+            var colnum = cdr.rand(0, cdr.colors.length-1);
+
+            var mycolor = cdr.colors[colnum];
+            newBalloon.style = "filter:" + mycolor.cssfilter +" drop-shadow(5px 8px 10px rgba(0,0,0,.4));";
+            newBalloon.mycolor = mycolor;
+            newBalloon.style.top = window.innerHeight + 100 + 'px';
+            newBalloon.style.left = x + 'px';
+            var scale = cdr.rand(100,250) / 100;
+            newBalloon.style.height = 100 * scale + 'px';
+            newBalloon.style.width = 80 * scale + 'px';
+            newBalloon.style.transitionDuration = cdr.rand(5,30) + "s";
+            newBalloon.addEventListener("transitionend", (evt) => {
+                console.dir(evt);
+            });
+            newBalloon.addEventListener("click", (evt) => {
+                console.dir(evt);
+                var bal = cdr.getBalloon(evt.target.id);
+                bal.balloon.style.visibility = 'hidden';
+                cdr.explode(bal, evt.x, evt.y, bal.color);
+                evt.preventDefault();
+                evt.stopPropagation();
+                return false;
+            });
+            cdr.balloons.push({"id":newBalloon.id, "balloon":newBalloon, "color":mycolor});
+            setTimeout(function() { newBalloon.style.top = -100 * scale + "px"; }, 1000);
+            document.querySelector("#main").appendChild(newBalloon);
+        },
+        rand: function(min, max) {
+            return Math.floor(Math.random() * (max + 1)) + min;
+        },
+        explode: function(who, x, y, mastercolor) {
+         console.log("Exploding " + who.balloon.id + " at [" + x + ", " + y + "] as color " + who.color.color); 
+            cdr.updateScore(cdr.score++);
+          var particles = 25,
+                // explosion container and its reference to be able to delete it on animation end
+            explosion = document.createElement('div');
+            explosion.className = 'explosion';
+          
+            cdr.board.append(explosion);
+            cdr.explosions.push(explosion);
+
+              // position the container to be centered on click
+            explosion.style.left =  x - 300 + 'px';
+            explosion.style.top =  y - 300 + 'px';
+            var mastercolor = cdr.rand(0,255) + ', ' + cdr.rand(0,255) + ', ' + cdr.rand(0,255);
+            for (var i = 0; i < particles; i++) {
+              // positioning x,y of the particle on the circle (little randomized radius)
+            var x = (explosion.offsetWidth / 2) + cdr.rand(80, 150) * Math.cos(2 * Math.PI * i / cdr.rand(particles - 10, particles + 10)),
+                y = (explosion.offsetHeight / 2) + cdr.rand(80, 150) * Math.sin(2 * Math.PI * i / cdr.rand(particles - 10, particles + 10)),
+                w = cdr.rand(10,30), h = cdr.rand(10, 30), color = who.color.color, //cdr.rand(0, 255) + ', ' + cdr.rand(0, 255) + ', ' + cdr.rand(0, 255), // randomize the color rgb
+                // particle element creation (could be anything other than div)
+                elm = document.createElement('div');
+                elm.className = 'particle';
+                elm.style = 'background-color: ' + color + ';' +
+                    'top: ' + y + 'px; ' +
+                    'left: ' + x + 'px; ' +
+                    'height: ' + h + 'px; ' +
+                    'width: ' + w + 'px;';
+
+                if (i == 0) { // no need to add the listener on all generated elements
+                    // css3 animation enddetection
+                    elm.addEventListener('animationend', function(e) {
+                        explosion.parentNode.removeChild(explosion); // remove this explosion container when animation ended
+                    }, 'once');
+                }
+                explosion.append(elm);
+            }
+        },
+        updateScore: function(scr) {
+            $("#score").innerHTML = cdr.score;
+        }
+};
+    window.cdr = cdr;
+    cdr.init();
+
+})();
+function $(txt) { return document.querySelector(txt); }
+function $$(txt) { return document.querySelectorAll(txt); }
+    </script>
+   </body>
+</html>
