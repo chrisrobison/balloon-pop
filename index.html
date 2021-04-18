@@ -2,8 +2,7 @@
 <html lang="en">
 
 <head>
-    <meta name="viewport" content="width=device-width, 
-    user-scalable=no, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
@@ -37,6 +36,24 @@
             text-align: center;
             margin: 0 auto;
         }
+        .webdings {
+            font-family: "Webdings", cursive;
+        }
+        #banner {
+            font-size: 48px;
+            font-family: "Helvetica Neue","Helvetica",sans-serif;
+            color:#eeeeee;
+            text-decoration:none;
+            text-transform: uppercase;
+            font-weight: bold;
+            position:absolute;
+            top:40%;
+            left:40%;
+            transition: all 200ms;
+        }
+        #banner:hover {
+           font-size: 56px; 
+        }
     </style>
 
 </head>
@@ -45,6 +62,7 @@
     <main>
         <canvas></canvas>
         <canvas id='confetti'></canvas>
+        <a href='#' id='banner' onclick='return POP.start()'>Start</a>
     </main>
     <script>
         function $(str) {
@@ -114,8 +132,8 @@
         // namespace our game
         var POP = {
             level: 1,
-            WIDTH: 320,
-            HEIGHT: 480,
+            WIDTH: 360,
+            HEIGHT: 640,
             scale: 1,
             
             // Position of the canvas in relation to the screen
@@ -147,10 +165,23 @@
             android: null,
             ios: null,
             sky: [ [{ "offset": 0, "color": "#00000c" }, { "color": "#000000", "offset": 1 }], [{ "color": "#020111", "offset": .85 }, { "color": "#191621", "offset": 1 }], [{ "color": "#020111", "offset": .6 }, { "color": "#20202c", "offset": 1 }], [{ "color": "#020111", "offset": .1 }, { "color": "#3a3a52", "offset": 1 }], [{ "color": "#20202c", "offset": 0 }, { "color": "#515175", "offset": 1 }], [{ "color": "#40405c", "offset": 0 }, { "color": "#6f71aa", "offset": .8 }, { "color": "#8a76ab", "offset": 1 }], [{ "color": "#4a4969", "offset": 0 }, { "color": "#7072ab", "offset": .5 }, { "color": "#cd82a0", "offset": 1 }], [{ "color": "#757abf", "offset": 0 }, { "color": "#8583be", "offset": .6 }, { "color": "#eab0d1", "offset": 1 }], [{ "color": "#82addb", "offset": 0 }, { "color": "#ebb2b1", "offset": 1 }], [{ "color": "#94c5f8", "offset": 1 }, { "color": "#a6e6ff", "offset": .7 }, { "color": "#b1b5ea", "offset": 1 }], [{ "color": "#b7eaff", "offset": 0 }, { "color": "#94dfff", "offset": 1 }], [{ "color": "#9be2fe", "offset": 0 }, { "color": "#67d1fb", "offset": 1 }], [{ "color": "#90dffe", "offset": 0 }, { "color": "#38a3d1", "offset": 1 }], [{ "color": "#57c1eb", "offset": 0 }, { "color": "#246fa8", "offset": 1 }], [{ "color": "#2d91c2", "offset": 0 }, { "color": "#1e528e", "offset": 1 }], [{ "color": "#2473ab", "offset": 0 }, { "color": "#1e528e", "offset": .7 }, { "color": "#5b7983", "offset": 1 }], [{ "color": "#1e528e", "offset": 0 }, { "color": "#265889", "offset": .5 }, { "color": "#9da671", "offset": 1 }], [{ "color": "#1e528e", "offset": 0 }, { "color": "#728a7c", "offset": .5 }, { "color": "#e9ce5d", "offset": 1 }], [{ "color": "#154277", "offset": 0 }, { "color": "#576e71", "offset": .3 }, { "color": "#e1c45e", "offset": .7 }, { "color": "#b26339", "offset": 1 }], [{ "color": "#163C52", "offset": 0 }, { "color": "#4f4f47", "offset": .3 }, { "color": "#c5752d", "offset": .6 }, { "color": "#b7490f", "offset": .8 }, { "color": "#2F1107", "offset": 1 }], [{ "color": "#071b26", "offset": 0 }, { "color": "#071B26", "offset": .3 }, { "color": "#8a3b12", "offset": .8, }, { "color": "#240e03", "offset": 1 }], [{ "color": "#010a10", "offset": .3 }, { "color": "#59230B", "offset": .8 }, { "color": "#2F1107", "offset": 1 }], [{ "color": "#090401", "offset": .5 }, { "color": "#4b1d06", "offset": 1 }], [{ "color": "#00000c", "offset": .8 }, { "color": "#150800", "offset": 1 }] ], 
+            config: {
             
+            },
+            state: {
+
+            },
+            images: {
+
+            },
             init: function() {
+                let hour = new Date().getHours();
+                POP.state.night = ((hour > 20) || (hour < 5)) ? true : false;
+
                 POP.CLOUD = new Image();
                 POP.CLOUD.src = "cloud2.png";
+                POP.SUNMOON = new Image();
+                POP.SUNMOON.src = (POP.state.night) ? "moon2.png" : "sun2.png";
 
                 POP.paused = 0;
 
@@ -194,12 +225,14 @@
                     POP.balloons[i].onload = function(e) {
                         console.log(`Loaded ${colorlist[i]} balloon.`);
                         if (i == colorlist.length - 1) {
-                            POP.loop();
+                            POP.render();
                         }
                     };
                 }
+                
+                POP.state.sunmoon = new POP.SunMoon();
 
-                for (let i = 0; i < 2 + POP.level; i++) {
+                for (let i = 0; i < POP.level + 2; i++) {
                     POP.clouds.push(new POP.Cloud());
                 }
 
@@ -228,24 +261,38 @@
                     }
                 }, false);
 
-                // listen for touches
-                window.addEventListener('touchstart', function(e) {
-                    e.preventDefault();
-                    POP.Input.set(e.touches[0]);
-                }, false);
-                
-                // Prevent scroll and zoom
-                window.addEventListener('touchmove', function(e) { e.preventDefault(); }, false);
-                window.addEventListener('touchend', function(e) { e.preventDefault(); }, false);
-
                 // we're ready to resize
                 POP.resize();
                 setupCanvas();
                 // POP.loop();
 
             },
+            preventDefault: function(e) {
+                e.preventDefault();
+                return false;
+            },
+            touchstart: function(e) {
+                e.preventDefault();
+                POP.Input.set(e.changedTouches[0]);
+            },
+            start: function() {
+                window.addEventListener('touchstart', POP.touchstart, {passive:false } );
+                window.addEventListener('touchmove', POP.preventDefault, {passive:false});
+                window.addEventListener('touchend', POP.preventDefault, {passive:false} );
+
+                $("#banner").style.display = "none";
+                POP.loop();
+                POP.Sound.music.volume = 0.18;
+                POP.Sound.music.loop = true;
+                POP.Sound.music.play();
+            },
+            gameover: function() {
+                window.removeEventListener('touchstart', POP.touchstart, {passive:false } );
+                window.removeEventListener('touchmove', POP.preventDefault, {passive:false});
+                window.removeEventListener('touchend', POP.preventDefault, {passive:false} );
 
 
+            },
             resize: function() {
                 $("main").style.height = window.innerHeight + 'px';
                 $("main").style.width = window.innerHeight * POP.RATIO + 'px';
@@ -253,6 +300,10 @@
                 POP.currentHeight = window.innerHeight;
                 POP.currentWidth = POP.currentHeight * POP.RATIO;
 
+                if (POP.currentWidth > window.innerWidth) {
+                    POP.currentWidth = window.innerWidth;
+
+                }
                 // this will create some extra space on the
                 // page, allowing us to scroll pass
                 // the address bar, and thus hide it.
@@ -261,14 +312,18 @@
                 }
 
                 // set the new canvas style width & height
-                // note: our canvas is still 320x480 but
+                // note: our canvas is still 360x640 but
                 // we're essentially scaling it with CSS
                 POP.canvas.style.width = POP.currentWidth + 'px';
                 POP.canvas.style.height = POP.currentHeight + 'px';
 
+                POP.confetti.style.width = POP.currentWidth + 'px';
+                POP.confetti.style.height = POP.currentHeight + 'px';
+                
                 // the amount by which the css resized canvas
-                // is different to the actual (480x320) size.
+                // is different to the actual (360x640) size.
                 POP.scale = POP.currentWidth / POP.WIDTH;
+
                 // position of canvas in relation to
                 // the screen
                 POP.offset.top = POP.canvas.offsetTop;
@@ -306,6 +361,11 @@
                     if (POP.collides({x: 300, y: 40, r: 20}, {x:POP.Input.x, y:POP.Input.y, r: 7})) {
                         POP.paused ^= 1;
                         POP.Input.tapped = false;
+                        if (POP.paused) {
+                            POP.Sound.music.pause();
+                        } else {
+                            POP.Sound.music.play();
+                        }
                     } else {
                         POP.score.taps += 1;
                         POP.entities.push(new POP.Touch(POP.Input.x, POP.Input.y));
@@ -322,7 +382,12 @@
                         POP.clouds.push(new POP.Cloud());
                     }
                 });
-
+                
+                POP.state.sunmoon.update();
+                
+                if (POP.state.sunmoon.remove) {
+                    POP.state.sunmoon = new POP.SunMoon();
+                }
                 // cycle through all entities and update as necessary
                 for (i = 0; i < POP.entities.length; i += 1) {
                     POP.entities[i].update();
@@ -373,6 +438,7 @@
                 let i;
 
                 POP.Draw.rect(0, 0, POP.WIDTH, POP.HEIGHT, POP.bggrad);
+                POP.state.sunmoon.render();
 
                 for (i = 0; i < POP.clouds.length; i++) {
                     POP.clouds[i].render();
@@ -486,6 +552,7 @@
 
         POP.Sound = {
             pops: [ new Audio("sounds/pop1.mp3"), new Audio("sounds/pop2.mp3"), new Audio("sounds/pop3.mp3") ],
+            music: new Audio("sounds/polka.mp3"),
             play: function() {
                 this.pops[~~(Math.random() * this.pops.length)].play();
             }
@@ -499,8 +566,10 @@
             tapped: false,
 
             set: function(data) {
+                data.offsetX = (data.offsetX) ? data.offsetX : data.clientX;
+                data.offsetY = (data.offsetY) ? data.offsetY : data.clientY;
                 this.x = (data.offsetX - POP.offset.left) / POP.scale;
-                this.y = (data.pageY - POP.offset.top) / POP.scale;
+                this.y = (data.offsetY - POP.offset.top) / POP.scale;
                 this.tapped = true;
 
             }
@@ -531,10 +600,49 @@
 
         };
 
+        POP.SunMoon = function() {
+            this.hour = new Date().getHours();
+            this.rand = Math.random();
+            
+            this.night = ((this.hour > 20) || (this.hour < 5)) ? true : false;
+            this.morning = (this.hour < 13) ? true : false;
+            this.sunset = ((this.hour > 16) && (this.hour < 20)) ? true : false;
+
+            this.width = ~~(this.rand * 400) + 150;
+            this.height = ~~(this.width); // * 0.66666);
+            
+            this.img = new Image();
+            this.img.src = (this.night) ? "moon2.png" : "sun2.png";
+
+            this.x = -this.width;
+            this.y = ~~(Math.random() * (POP.HEIGHT - this.height));
+            
+            this.velX = Math.random() * Math.random() + .25;
+            this.velY = Math.random() * .5;
+            
+            this.velY *= (this.y < (POP.currentHeight / 2)) ? 1 : -1;
+
+            this.update = function() {
+                this.x += this.velX;
+                this.y += this.velY;
+
+                this.remove = ((this.x > POP.WIDTH) || (this.y > POP.HEIGHT) || (this.x < -this.width) || (this.y < -this.height)) ? true : false;
+            };
+
+            this.render = function() {
+                POP.ctx.save();
+                POP.ctx.globalAlpha = 0.6;
+                POP.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+                POP.ctx.restore();
+            };
+        };
+
+
+
         POP.Cloud = function() {
             this.rand = Math.random();
             this.width = ~~(this.rand * 300) + 150;
-            this.height = ~~(this.width * 0.66666);
+            this.height = ~~(this.width); // * 0.66666);
             this.x = -this.width;
             this.y = ~~(Math.random() * (POP.HEIGHT - this.height));
             this.velX = Math.random() * Math.random();
