@@ -151,7 +151,8 @@
                 taps: 0,
                 hit: 0,
                 escaped: 0,
-                accuracy: 0
+                accuracy: 0,
+                total: 0
             },
             // we'll set the rest of these
             // in the init function
@@ -180,6 +181,7 @@
 
                 POP.CLOUD = new Image();
                 POP.CLOUD.src = "cloud2.png";
+                
                 POP.SUNMOON = new Image();
                 POP.SUNMOON.src = (POP.state.night) ? "moon2.png" : "sun2.png";
 
@@ -389,7 +391,7 @@
                     POP.state.sunmoon = new POP.SunMoon();
                 }
                 // cycle through all entities and update as necessary
-                for (i = 0; i < POP.entities.length; i += 1) {
+                for (i = 0; i < POP.entities.length; i++) {
                     POP.entities[i].update();
 
                     if (POP.entities[i].type === 'balloon' && checkCollision) {
@@ -415,6 +417,9 @@
                     // delete from array if remove property
                     // flag is set to true
                     if (POP.entities[i].remove) {
+                        if (POP.entities[i].type === "balloon") {
+                            POP.score.total++;
+                        }
                         POP.entities.splice(i, 1);
                     }
                 }
@@ -426,7 +431,7 @@
                 //POP.wire.offset = Math.sin(POP.wire.time * 0.8) * 5;
 
                 // calculate accuracy
-                POP.score.accuracy = (POP.score.hit / POP.score.taps) * 100;
+                POP.score.accuracy = (POP.score.hit / POP.score.taps ) * 100;
                 POP.score.accuracy = isNaN(POP.score.accuracy) ? 0 : ~~(POP.score.accuracy); // a handy way to round floats
 
             },
@@ -459,12 +464,13 @@
                 }
 
                 POP.ctx.fillStyle = "#00000066";
-                POP.ctx.fillRect(15, 15, 120, 70);
+                POP.ctx.fillRect(15, 15, 120, 100);
 
                 // display scores
                 POP.Draw.text('Hit: ' + POP.score.hit, 20, 30, 14, '#fff');
                 POP.Draw.text('Escaped: ' + POP.score.escaped, 20, 50, 14, '#fff');
-                POP.Draw.text('Accuracy: ' + POP.score.accuracy + '%', 20, 70, 14, '#fff');
+                POP.Draw.text('Balloons: ' + POP.score.total, 20, 70, 14, '#fff');
+                POP.Draw.text('Accuracy: ' + POP.score.accuracy + '%', 20, 90, 14, '#fff');
                 if (POP.paused) {
                     POP.Draw.text(String.fromCharCode(52), 260, 60, 64, '#fff', "Webdings");
                 } else {
@@ -617,8 +623,8 @@
             this.x = -this.width;
             this.y = ~~(Math.random() * (POP.HEIGHT - this.height));
             
-            this.velX = Math.random() * Math.random() + .25;
-            this.velY = Math.random() * .5;
+            this.velX = (Math.random() * (Math.random() * .25)) / 100;
+            this.velY = ((Math.random() * .25) + .25 ) / 100;
             
             this.velY *= (this.y < (POP.currentHeight / 2)) ? 1 : -1;
 
@@ -631,7 +637,7 @@
 
             this.render = function() {
                 POP.ctx.save();
-                POP.ctx.globalAlpha = 0.6;
+                POP.ctx.globalAlpha = 0.4;
                 POP.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
                 POP.ctx.restore();
             };
@@ -639,13 +645,16 @@
 
 
 
-        POP.Cloud = function() {
+        POP.Cloud = function(r=false) {
             this.rand = Math.random();
-            this.width = ~~(this.rand * 300) + 150;
-            this.height = ~~(this.width); // * 0.66666);
-            this.x = -this.width;
-            this.y = ~~(Math.random() * (POP.HEIGHT - this.height));
-            this.velX = Math.random() * Math.random();
+            this.scale = this.rand + .25;
+            this.width = 300 * this.scale;
+            this.height = 200 * this.scale;
+
+            this.x = (r) ? ~~(this.rand * POP.currentWidth) : -this.width;
+            this.y = ~~(this.rand * (POP.HEIGHT - this.height));
+            
+            this.velX = this.rand * this.rand;
             this.velY = 0;
 
             this.update = function() {
@@ -657,7 +666,7 @@
 
             this.render = function() {
                 POP.ctx.save();
-                POP.ctx.globalAlpha = 0.6;
+                POP.ctx.globalAlpha = 0.4;
                 POP.ctx.drawImage(POP.CLOUD, this.x, this.y, this.width, this.height);
                 POP.ctx.restore();
             };
@@ -665,6 +674,7 @@
 
         POP.Balloon = function() {
             this.type = 'balloon';
+
             this.r = (Math.random() * 20) + (20 / POP.level);
             this.speed = (Math.random() * 2) + .25;
             this.rando = Math.floor(Math.random() * colorlist.length);
@@ -696,7 +706,7 @@
                 this.x = this.wireSize * Math.sin(time) + this.xConstant;
 
                 // if offscreen flag for removal
-                if (this.y < -10) {
+                if (this.y < -this.height) {
                     POP.score.escaped += 1; // update score
                     this.remove = true;
                 }
