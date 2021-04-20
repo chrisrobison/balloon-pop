@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Titan+One&display=swap" rel="stylesheet">
     <style type="text/css">
         body {
             margin: 0;
@@ -47,13 +48,30 @@
             text-transform: uppercase;
             font-weight: bold;
             position:absolute;
-            top:40%;
-            left:40%;
+            top:20%;
+            left:0%;
             transition: all 200ms;
+        }
+        #banner img {
+            width: 80%;
+            animation: 5s linear 0s infinite wave;
         }
         #banner:hover {
            font-size: 56px; 
         }
+
+        @keyframes wave {
+            0% {
+                transform: translatey(0px);
+            }
+            50% {
+                transform: translatey(-20px);
+            }
+            100% {
+                transform: translatey(0px);
+            }
+        }
+
     </style>
 
 </head>
@@ -62,7 +80,7 @@
     <main>
         <canvas></canvas>
         <canvas id='confetti'></canvas>
-        <a href='#' id='banner' onclick='return POP.start()'>Start</a>
+        <a href='#' id='banner' onclick='return POP.start()'><img width='100%' src='assets/logo.png' /><br/>Start</a>
     </main>
     <script>
         function $(str) {
@@ -84,49 +102,152 @@
         })();
 
         const colors = {
-            green: {
-                front: '#3b870a',
-                back: '#235106',
-                color: 'green'
-            },
-            yellow: {
-                front: '#b9b900',
-                back: '#6f6f00',
-                color: 'yellow'
-            },
-            red: {
-                front: '#e23d34',
-                back: '#88251f',
-                color: 'red'
-            },
-            pink: {
-                front: '#cd3168',
-                back: '#7b1d3e',
-                color: 'pink'
-            },
-            mylar: {
-                front: '#eeeeee',
-                back: '#dddddd',
-                color: 'mylar'
-            },
             blue: {
                 front: '#394f78',
                 back: '#222f48',
-                color: 'blue'
+                color: 'blue',
+                img: {
+                    src: 'balloon_blue.png',
+                    width:341,
+                    height:443
+                }
+
             },
-            sky: {
-                front: '#008a8a',
-                back: '#005353',
-                color: 'sky'
+            gold: {
+                front: '#d8ce5b',
+                back: '#736c1c',
+                color: 'green',
+                img: {
+                    src: 'balloon_green.png',
+                    width:341,
+                    height:443
+                }
+
+            },
+            green: {
+                front: '#00cc77',
+                back: '#009944',
+                color: 'green',
+                img: {
+                    src: 'balloon_green.png',
+                    width:341,
+                    height:443
+                }
+
             },
             heart: {
                 front: '#cc0000',
                 back: '#990000',
-                color: 'darkred'
-            }
+                color: 'darkred',
+                img: {
+                    src: 'balloon_heart.png',
+                    width:350,
+                    height:386
+                }
+
+            },
+            lime: {
+                front: '#00ee00',
+                back: '#00bb00',
+                color: 'lime',
+                img: {
+                    src: 'balloon_lime.png',
+                    width:341,
+                    height:443
+                }
+
+            },
+            mylar: {
+                front: '#eeeeee',
+                back: '#dddddd',
+                color: 'mylar',
+                img: {
+                    src: 'balloon_mylar.png',
+                    width:350,
+                    height:413
+                }
+
+            },
+            orange: {
+                front: '#cda168',
+                back: '#7b1d3e',
+                color: 'orange',
+                img: {
+                    src: 'balloon_orange.png',
+                    width:341,
+                    height:443
+                }
+
+            },
+            pink: {
+                front: '#cd3168',
+                back: '#7b1d3e',
+                color: 'pink',
+                img: {
+                    src: 'balloon_pink.png',
+                    width:341,
+                    height:443
+                }
+
+            },
+            purple: {
+                front: '#cd3168',
+                back: '#7b1d3e',
+                color: 'purple',
+                img: {
+                    src: 'balloon_purple.png',
+                    width:341,
+                    height:443
+                }
+
+            },
+            red: {
+                front: '#e23d34',
+                back: '#88251f',
+                color: 'red',
+                img: {
+                    src: 'balloon_red.png',
+                    width:341,
+                    height:443
+                }
+
+            },
+            sky: {
+                front: '#008a8a',
+                back: '#005353',
+                color: 'sky',
+                img: {
+                    src: 'balloon_sky.png',
+                    width:341,
+                    height:443
+                }
+
+            },
+            ufo: {
+                front: '#dedede',
+                back: '#aaaaaa',
+                color: 'ufo',
+                img: {
+                    src: 'balloon_ufo.png',
+                    width:500,
+                    height:500
+                }
+
+            },
+            yellow: {
+                front: '#b9b900',
+                back: '#6f6f00',
+                color: 'yellow',
+                img: {
+                    src: 'balloon_yellow.png',
+                    width:341,
+                    height:443
+                }
+
+            },
         };
 
-        const colorlist = ['blue', 'green', 'pink', 'red', 'sky', 'yellow', 'mylar', 'heart'];
+        const colorlist = ['blue', 'gold', 'green', 'heart', 'lime', 'mylar', 'orange', 'pink', 'red', 'sky', 'ufo', 'yellow'];
 
 
         // namespace our game
@@ -148,7 +269,7 @@
             nextBalloon: 60,
             // for tracking player's progress
             score: {
-                taps: -1,
+                taps: 0,
                 hit: 0,
                 escaped: 0,
                 accuracy: 0,
@@ -224,6 +345,7 @@
 
                 for (let i = 0; i < colorlist.length; i++) {
                     POP.balloons[i] = new Image();
+                    POP.balloons[i].info = colors[colorlist[i]];
                     POP.balloons[i].src = `assets/balloon_${colorlist[i]}.png`;
                     POP.balloons[i].onload = function(e) {
                         // console.log(`Loaded ${colorlist[i]} balloon.`);
@@ -282,7 +404,7 @@
                 window.addEventListener('touchstart', POP.touchstart, {passive:false } );
                 window.addEventListener('touchmove', POP.preventDefault, {passive:false});
                 window.addEventListener('touchend', POP.preventDefault, {passive:false} );
-
+                POP.score.missed = -1;
                 $("#banner").style.display = "none";
                 POP.loop();
                 POP.Sound.music.volume = 0.18;
@@ -431,6 +553,7 @@
                 
                 if (checkCollision && !hadhit) {
                    POP.score.missed++;
+                    POP.score.escaped++;
                 }
                 // update wire offset
                 // feel free to play with these values for
@@ -439,7 +562,7 @@
                 //POP.wire.offset = Math.sin(POP.wire.time * 0.8) * 5;
 
                 // calculate accuracy
-                POP.score.accuracy = (POP.score.hit / POP.score.total) * 100;
+                POP.score.accuracy = (POP.score.hit / (POP.score.total + POP.score.missed)) * 100;
                 POP.score.accuracy = isNaN(POP.score.accuracy) ? 0 : ~~(POP.score.accuracy); // a handy way to round floats
 
             },
@@ -472,17 +595,19 @@
                 }
 
                 POP.ctx.fillStyle = "#00000066";
-                POP.ctx.fillRect(15, 15, 120, 100);
+                POP.ctx.fillRect(5, 5, 140, 85);
 
+                POP.ctx.font = "uppercase 22px 'Titan One'";
                 // display scores
-                POP.Draw.text('Hits: ' + POP.score.hit + ' / ' + POP.score.taps, 20, 30, 14, '#fff');
-                POP.Draw.text('Accuracy: ' + POP.score.accuracy + '%', 20, 90, 14, '#fff');
-                POP.Draw.text('Balloons: ' + POP.score.total, 20, 70, 14, '#fff');
-                POP.Draw.text('Escaped: ' + POP.score.escaped, 20, 50, 14, '#fff');
+                POP.Draw.text(`${POP.score.hit}`, 20, 30, 30, "#eee", "'Titan One'");
+
+                // POP.Draw.text(`${POP.score.escaped}`, 20, 50, 20, "#fff", "'Titan One'");
+                POP.Draw.text(`${POP.score.accuracy}%`, 20, 70, 20, "#fff", "'Titan One'");
+                
                 if (POP.paused) {
-                    POP.Draw.text(String.fromCharCode(52), 260, 60, 64, '#fff', "Webdings");
+                    POP.Draw.text(String.fromCharCode(52), 260, 60, 64, "#fff", "Webdings");
                 } else {
-                    POP.Draw.text(String.fromCharCode(59), 260, 60, 64, '#fff', "Webdings");
+                    POP.Draw.text(String.fromCharCode(59), 260, 60, 64, "#fff", "Webdings");
                 }
 
             },
@@ -548,6 +673,7 @@
                 POP.ctx.beginPath();
                 POP.ctx.lineWidth = 1;
                 POP.ctx.arc(x + 5, y + 50, r, Math.PI / 1.25, Math.PI / 5, true);
+                POP.ctx.arc(x + 5, y + 80, r, Math.PI / 1.25, Math.PI / 5, true);
                 POP.ctx.stroke();
             },
 
@@ -622,7 +748,7 @@
             this.morning = (this.hour < 13) ? true : false;
             this.sunset = ((this.hour > 16) && (this.hour < 20)) ? true : false;
 
-            this.width = ~~(this.rand * 400) + 150;
+            this.width = ~~(this.rand * 300) + 50;
             this.height = ~~(this.width); // * 0.66666);
             
             this.img = new Image();
@@ -683,21 +809,23 @@
         POP.Balloon = function() {
             this.type = 'balloon';
 
-            this.r = (Math.random() * 20) + (20 / POP.level);
+            this.r = (Math.random() * 30) + (30 / POP.level);
             this.speed = (Math.random() * 2) + .25;
             this.rando = Math.floor(Math.random() * colorlist.length);
             this.color = colorlist[this.rando];
-            this.basecolor = colorlist[this.rando];
+            this.balloon = colors[colorlist[this.rando]];
+            
             this.x = ~~(Math.random() * (POP.WIDTH - (this.r * 2)) + this.r);
             this.y = ~~(POP.HEIGHT + (Math.random() * 100) + 100);
+            this.offset = ~~(Math.random() * 10000);
 
             // console.log(`New balloon with color ${this.basecolor}`);
 
             // the amount by which the balloon
             // will move from side to side
-            this.wireSize = Math.floor(Math.random() * 5) + (this.r / 2);
+            this.waveSize = Math.floor(Math.random() * (5 * POP.level)) + (this.r / 2);
             // we need to remember the original
-            // x position for our sine wire calculation
+            // x position for our sine wave calculation
             this.xConstant = this.x;
 
             this.remove = false;
@@ -706,12 +834,12 @@
 
             this.update = function() {
 
-                // a sine wire is commonly a function of time
-                var time = new Date().getTime() * 0.002;
+                // a sine wave is commonly a function of time
+                var time = (new Date().getTime() + this.offset) * 0.002;
 
                 this.y -= this.speed;
                 // the x coord to follow a sine wire
-                this.x = this.wireSize * Math.sin(time) + this.xConstant;
+                this.x = this.waveSize * Math.sin(time) + this.xConstant;
 
                 // if offscreen flag for removal
                 if (this.y < -10) {
@@ -726,7 +854,7 @@
                 POP.ctx.save();
                 POP.ctx.globalAlpha = 0.8;
                 //                POP.Draw.circle(this.x, this.y, this.r, this.color);
-                POP.ctx.drawImage(this.image, 0, 0, 341, 443, this.x - this.r + 5, this.y - this.r + 5, this.r * 2, ((this.r * 2) / 341) * 443);
+                POP.ctx.drawImage(this.image, 0, 0, this.balloon.img.width, this.balloon.img.height, this.x - this.r + 5, this.y - this.r + 5, this.r * 2, ((this.r * 2) / 341) * 443);
                 POP.ctx.restore();
             };
 
@@ -813,10 +941,8 @@
             flipSpeed: 0.027,
         };
 
-        // const colors = [{ front: '#3B870A', back: '#235106', color: 'green' }, { front: '#B96300', back: '#6f3b00', color: 'orange' }, { front: '#E23D34', back: '#88251f', color: 'red' }, { front: '#CD3168', back: '#7b1d3e', color: 'purple' }, { front: '#664E8B', back: '#3d2f53', color: 'violet' }, { front: '#394F78', back: '#222f48', color: 'blue' }, { front: '#008A8A', back: '#005353', color: 'cyan' }, ];
-
         // Confetti constructor
-        function Conf(color) {
+        function Confetti(color) {
             this.randomModifier = rand(-1, 1);
 
             if (!color) {
@@ -848,6 +974,7 @@
             }
 
             this.terminalVelocity = rand(1, 1.5) * confettiParams.terminalVelocity;
+            this.remove = false;
 
             this.update = function() {
                 this.velocity.x *= 0.98;
@@ -861,37 +988,37 @@
                 this.scale.y = Math.cos((this.position.y + this.randomModifier) * this.flipSpeed);
                 this.color = this.scale.y > 0 ? this.colorPair.front : this.colorPair.back;
             }
+
+            this.render = function() {
+                this.update();
+                confettiCtx.translate(this.position.x, this.position.y);
+                confettiCtx.rotate(this.rotation);
+                const width = (this.dimensions.x * this.scale.x);
+                const height = (this.dimensions.y * this.scale.y);
+                confettiCtx.fillStyle = this.color;
+                confettiCtx.fillRect(-0.5 * width, -0.5 * height, width, height);
+                this.dimensions.x -= 0.125;
+                this.dimensions.y -= 0.125;
+
+                if ((this.dimensions.x < 0) || (this.dimensions.y < 0)) {
+                    this.remove = true;
+                }
+                confettiCtx.setTransform(1, 0, 0, 1, 0, 0)
+            };
         }
 
         function updateConfetti() {
             confettiCtx.clearRect(0, 0, POP.WIDTH, POP.HEIGHT);
 
             confettiElements.forEach((c, i) => {
-                c.update();
-                confettiCtx.translate(c.position.x, c.position.y);
-                confettiCtx.rotate(c.rotation);
-                const width = (c.dimensions.x * c.scale.x);
-                const height = (c.dimensions.y * c.scale.y);
-                confettiCtx.fillStyle = c.color;
-                confettiCtx.fillRect(-0.5 * width, -0.5 * height, width, height);
-                c.dimensions.x -= 0.125;
-                c.dimensions.y -= 0.125;
+                c.render();
 
-                if ((c.dimensions.x < 0) || (c.dimensions.y < 0)) {
+                if (c.remove) {
                     confettiElements.splice(i, 1);
                 }
+                
                 confettiCtx.setTransform(1, 0, 0, 1, 0, 0)
             });
-            /*
-                confettiElements.forEach((c, idx) => {
-                    if (c.position.y > container.h ||
-                        c.position.x < -0.5 * container.x ||
-                        c.position.x > 1.5 * container.x) {
-                        confettiElements.splice(idx, 1)
-
-                    }
-                });
-            */
             if (confettiElements.length) window.requestAnimationFrame(updateConfetti);
         }
         let container, confettiCtx;
@@ -901,13 +1028,6 @@
             POP.confetti.style.width = POP.currentWidth + 'px';
             POP.confetti.style.height = POP.currentHeight + 'px';
 
-            /*
-            $("#confetti").height = window.innerHeight;
-            $("#confetti").width = window.innerHeight * POP.RATIO;
-
-            $("#confetti").style.height = window.innerHeight + 'px';
-            $("#confetti").style.width = window.innerHeight * POP.RATIO + 'px';
-            */
             const box = $("#confetti").getBoundingClientRect();
 
             container = {
@@ -916,14 +1036,7 @@
                 w: POP.WIDTH,
                 h: POP.HEIGHT
             };
-
-            /*
-            container = {
-                w: confetti.clientWidth,
-                h: confetti.clientHeight
-            };
-            */
-        }
+       }
 
         let confettiElements = [];
 
@@ -949,7 +1062,7 @@
                 ];
             }
             for (let i = 0; i < confettiParams.number; i++) {
-                confettiElements.push(new Conf(color))
+                confettiElements.push(new Confetti(color))
             }
             window.requestAnimationFrame(updateConfetti);
         }
@@ -959,11 +1072,6 @@
             window.cancelAnimationFrame(updateConfetti)
         }
 
-        // confettiLoop();
-        function confettiLoop() {
-            addConfetti();
-            setTimeout(confettiLoop, 700 + Math.random() * 1700);
-        }
     </script>
 </body>
 
