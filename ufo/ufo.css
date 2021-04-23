@@ -1,0 +1,44 @@
+/*
+-------------------------------------------------------------------
+Created with TexturePacker https://www.codeandweb.com/texturepacker
+-------------------------------------------------------------------
+Inline:     <i class="yourspritesname"></i>
+Responsive: <div class="yourspritesname"></div>
+*/
+
+
+.ufo1 {max-width:421px; max-height:175px; }
+.ufo1::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 0.2358490566037736% 0.18867924528301888%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo1::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo10 {max-width:421px; max-height:175px; }
+.ufo10::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 0.2358490566037736% 0.18867924528301888%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo10::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo11 {max-width:421px; max-height:175px; }
+.ufo11::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 99.76415094339623% 0.18867924528301888%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo11::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo2 {max-width:421px; max-height:175px; }
+.ufo2::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 0.2358490566037736% 33.39622641509434%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo2::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo3 {max-width:421px; max-height:175px; }
+.ufo3::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 99.76415094339623% 33.39622641509434%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo3::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo4 {max-width:421px; max-height:175px; }
+.ufo4::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 0.2358490566037736% 66.60377358490567%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo4::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo5 {max-width:421px; max-height:175px; }
+.ufo5::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 99.76415094339623% 66.60377358490567%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo5::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo6 {max-width:421px; max-height:175px; }
+.ufo6::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 0.2358490566037736% 66.60377358490567%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo6::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo7 {max-width:421px; max-height:175px; }
+.ufo7::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 0.2358490566037736% 99.81132075471699%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo7::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo8 {max-width:421px; max-height:175px; }
+.ufo8::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 99.76415094339623% 99.81132075471699%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo8::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+.ufo9 {max-width:421px; max-height:175px; }
+.ufo9::after {content: '\00a0';display: inline-block; width:421px; height:175px; background-position: 0.2358490566037736% 33.39622641509434%;background-size: 200.7125890736342% 402.85714285714283%;background-image: url(ufo.png);padding: 0; }
+div.ufo9::after {max-width:421px; width:100%;height:0;padding: 0 0 41.56769596199525% 0;}
+
+/* $TexturePacker:SmartUpdate:a422331f356c40a02d5060d84571174d:affd0e0fd63f6080942f1709a0eb75f4:4b5f2001cafd2a08f3e760fd43a32e21$ */

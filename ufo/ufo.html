@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+<style>
+    body {
+        font-family: "Helvetica Neue", "Helvetica", sans-serif;
+        margin:0;
+        padding:0;
+        font-size:14px;
+    }
+    header {
+        background-color:#999;
+        color:#eee;
+        height:0vh;
+    }
+    main {
+        background-color:#000;
+        color:#ddd;
+        height:100vh;
+        overflow:scroll;
+    }
+    footer {
+        background-color:#666;
+        color:#eee;
+        height:0vh;
+    }
+    canvas {
+        width:800px;
+        height:600px;
+        display: inline-block;
+        border:1px solid #fff;
+    }
+</style>
+</head>
+
+<body> 
+<main> 
+    <canvas width="800" height="600"></canvas>
+</main>
+
+<script>
+    function $(str) { return document.querySelector(str); }
+    function $$(str) { return document.querySelectorAll(str); }
+    
+    window.requestAnimFrame = (function() { return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) { window.setTimeout(callback, 1000 / 60); }; })();
+
+    (function() {
+        const app = {
+            config: {
+                width: 800,
+                height: 600,
+                offsetX: 100,
+                offsetY: 100,
+                floatRange: 20,
+                scale: 0.25
+            },
+            init: function() {
+                for (let i=1; i < 12; i++) {
+                    app.state.images[i - 1] = new Image();
+                    if (i===11) {
+                        app.state.images[i - 1].addEventListener("load", function() { app.state.loaded = true; app.renderUFO(1); app.loop(); });
+                    }
+                    app.state.images[i - 1].src = `ufo${i}.png`;
+
+                }
+                app.state.float.incX = (Math.random() * 1) + .25;
+                app.state.float.incY = (Math.random() * 1) + .25;
+                app.state.canvas = $("canvas");
+                app.state.ctx = app.state.canvas.getContext("2d");
+
+            },
+            renderUFO: function() {
+                app.state.ctx.clearRect(0, 0, app.config.width, app.config.height);
+                app.state.ctx.drawImage(app.state.images[app.state.frame], 0, 0, app.state.images[app.state.frame].width, app.state.images[app.state.frame].height, app.state.float.x + app.config.offsetX, app.state.float.y + app.config.offsetY, app.state.images[app.state.frame].width * app.config.scale, app.state.images[app.state.frame].height * app.config.scale);
+                app.state.frame++;
+                if (app.state.frame > 10) {
+                    app.state.frame = 0;
+                }
+                app.state.float.x += app.state.float.incX;
+                app.state.float.y += app.state.float.incY;
+                
+                if ((Math.abs(app.state.float.x) > app.config.floatRange) || (app.state.float.x === 0)) {
+                    app.state.float.incX *= -1;
+                }
+                
+                if ((Math.abs(app.state.float.y) > app.config.floatRange) || (app.state.float.y === 0)) {
+                    app.state.float.incY *= -1;
+                }
+            },
+            loop: function() {
+                if (!app.state.paused) {
+                    setTimeout(function() { requestAnimFrame(app.loop); }, 75);
+                    app.renderUFO();
+                }
+            },
+            state: {
+                loaded: false,
+                images: [],
+                frame: 0,
+                paused: 0,
+                float: {
+                    x: 0,
+                    y: 0,
+                    incX: 1,
+                    incY: 1
+                }
+            }
+        }
+        window.app = app;
+        app.init();
+    })();
+</script>
+</body>
+
+</html>

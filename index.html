@@ -80,7 +80,7 @@
     <main>
         <canvas></canvas>
         <canvas id='confetti'></canvas>
-        <a href='#' id='banner' onclick='return POP.start()'><img width='100%' src='assets/logo.png' /><br/>Start</a>
+        <a href='#' id='banner' onclick='return app.start()'><img width='100%' src='assets/logo.png' /><br/>Start</a>
     </main>
     <script>
         function $(str) {
@@ -251,7 +251,7 @@
 
 
         // namespace our game
-        var POP = {
+        var app = {
             level: 1,
             WIDTH: 360,
             HEIGHT: 640,
@@ -299,72 +299,72 @@
             },
             init: function() {
                 let hour = new Date().getHours();
-                POP.state.night = ((hour > 20) || (hour < 5)) ? true : false;
+                app.state.night = ((hour > 20) || (hour < 5)) ? true : false;
 
-                POP.CLOUD = new Image();
-                POP.CLOUD.src = "cloud2.png";
+                app.CLOUD = new Image();
+                app.CLOUD.src = "cloud2.png";
                 
-                POP.SUNMOON = new Image();
-                POP.SUNMOON.src = (POP.state.night) ? "moon2.png" : "sun2.png";
+                app.SUNMOON = new Image();
+                app.SUNMOON.src = (app.state.night) ? "moon2.png" : "sun2.png";
 
-                POP.paused = 0;
+                app.paused = 0;
 
                 // the proportion of width to height
-                POP.RATIO = POP.WIDTH / POP.HEIGHT;
+                app.RATIO = app.WIDTH / app.HEIGHT;
                 // these will change when the screen is resize
-                POP.currentWidth = POP.WIDTH;
-                POP.currentHeight = POP.HEIGHT;
+                app.currentWidth = app.WIDTH;
+                app.currentHeight = app.HEIGHT;
                 // this is our canvas element
-                POP.canvas = document.querySelectorAll('canvas')[0];
-                POP.confetti = document.querySelector('#confetti');
+                app.canvas = document.querySelectorAll('canvas')[0];
+                app.confetti = document.querySelector('#confetti');
 
-                POP.canvas.width = POP.WIDTH;
-                POP.canvas.height = POP.HEIGHT;
+                app.canvas.width = app.WIDTH;
+                app.canvas.height = app.HEIGHT;
 
-                POP.confetti.width = POP.WIDTH;
-                POP.confetti.height = POP.HEIGHT;
+                app.confetti.width = app.WIDTH;
+                app.confetti.height = app.HEIGHT;
 
-                POP.ctx = POP.canvas.getContext('2d');
+                app.ctx = app.canvas.getContext('2d');
 
 
-                POP.bggrad = POP.ctx.createLinearGradient(0, 0, window.innerHeight * POP.RATIO, window.innerHeight);
+                app.bggrad = app.ctx.createLinearGradient(0, 0, window.innerHeight * app.RATIO, window.innerHeight);
 
                 // set background gradient based on hour of day
-                let currentGradient = POP.sky[new Date().getHours()];
+                let currentGradient = app.sky[new Date().getHours()];
 
-                //currentGradient = POP.sky[12];  // <-- uncomment to always be noon
-                currentGradient.forEach(item => POP.bggrad.addColorStop(item.offset, item.color));
+                //currentGradient = app.sky[12];  // <-- uncomment to always be noon
+                currentGradient.forEach(item => app.bggrad.addColorStop(item.offset, item.color));
 
                 // log android, ios & useragent environments so we know if we need to
                 // hide the address bar in the resize function
-                POP.ua = navigator.userAgent.toLowerCase();
-                POP.android = POP.ua.indexOf('android') > -1 ? true : false;
-                POP.ios = (POP.ua.indexOf('iphone') > -1 || POP.ua.indexOf('ipad') > -1) ? true : false;
+                app.ua = navigator.userAgent.toLowerCase();
+                app.android = app.ua.indexOf('android') > -1 ? true : false;
+                app.ios = (app.ua.indexOf('iphone') > -1 || app.ua.indexOf('ipad') > -1) ? true : false;
 
-                POP.balloons = [];
+                app.balloons = [];
 
                 for (let i = 0; i < colorlist.length; i++) {
-                    POP.balloons[i] = new Image();
-                    POP.balloons[i].info = colors[colorlist[i]];
-                    POP.balloons[i].src = `assets/balloon_${colorlist[i]}.png`;
-                    POP.balloons[i].onload = function(e) {
+                    app.balloons[i] = new Image();
+                    app.balloons[i].info = colors[colorlist[i]];
+                    app.balloons[i].src = `assets/balloon_${colorlist[i]}.png`;
+                    app.balloons[i].onload = function(e) {
                         // console.log(`Loaded ${colorlist[i]} balloon.`);
                         if (i == colorlist.length - 1) {
-                            POP.render();
+                            app.render();
                         }
                     };
                 }
                 
-                POP.state.sunmoon = new POP.SunMoon();
+                app.state.sunmoon = new app.SunMoon();
 
-                for (let i = 0; i < POP.level + 2; i++) {
-                    POP.clouds.push(new POP.Cloud());
+                for (let i = 0; i < app.level + 2; i++) {
+                    app.clouds.push(new app.Cloud());
                 }
 
                 // set up our wire effect
                 // basically, a series of overlapping circles
                 // across the top of screen
-                POP.wire = {
+                app.wire = {
                     x: -50, // x coord of first circle
                     y: -400, // y coord of first circle
                     r: 400, // circle radius
@@ -373,12 +373,12 @@
                 };
                 // calculate how many circles we need to 
                 // cover the screen width
-                POP.wire.total = Math.ceil(POP.WIDTH / POP.wire.r) + 1;
+                app.wire.total = Math.ceil(app.WIDTH / app.wire.r) + 1;
 
                // we're ready to resize
-                POP.resize();
+                app.resize();
                 setupCanvas();
-                // POP.loop();
+                // app.loop();
 
             },
             preventDefault: function(e) {
@@ -387,73 +387,74 @@
             },
             touchstart: function(e) {
                 e.preventDefault();
-                POP.Input.set(e.changedTouches[0]);
+                app.Input.set(e.changedTouches[0]);
             },
             doclick: function(e) {
                 e.preventDefault();
-                if (POP.paused) {
-                    POP.paused = 0;
-                    POP.loop();
+                if (app.paused) {
+                    app.paused = 0;
+                    app.loop();
                 } else {
-                    POP.Input.set(e);
+                    app.Input.set(e);
                 }
             },
             start: function() {
                 // listen for clicks
-                window.addEventListener('click', POP.doclick, {passive: false} );
-                window.addEventListener('touchstart', POP.touchstart, {passive:false } );
-                window.addEventListener('touchmove', POP.preventDefault, {passive:false});
-                window.addEventListener('touchend', POP.preventDefault, {passive:false} );
-                POP.score.missed = -1;
+                window.addEventListener('click', app.doclick, {passive: false} );
+                window.addEventListener('touchstart', app.touchstart, {passive:false } );
+                window.addEventListener('touchmove', app.preventDefault, {passive:false});
+                window.addEventListener('touchend', app.preventDefault, {passive:false} );
+                app.score.missed = -1;
                 $("#banner").style.display = "none";
-                POP.loop();
-                POP.Sound.music.volume = 0.18;
-                POP.Sound.music.loop = true;
-                POP.Sound.music.play();
+                app.loop();
+                app.Sound.music.volume = 0.18;
+                app.Sound.music.loop = true;
+                app.Sound.music.playbackRate = 0.6;
+                app.Sound.music.play();
             },
             gameover: function() {
-                window.removeEventListener('click', POP.doclick, {passive:false } );
-                window.removeEventListener('touchstart', POP.touchstart, {passive:false } );
-                window.removeEventListener('touchmove', POP.preventDefault, {passive:false});
-                window.removeEventListener('touchend', POP.preventDefault, {passive:false} );
+                window.removeEventListener('click', app.doclick, {passive:false } );
+                window.removeEventListener('touchstart', app.touchstart, {passive:false } );
+                window.removeEventListener('touchmove', app.preventDefault, {passive:false});
+                window.removeEventListener('touchend', app.preventDefault, {passive:false} );
 
 
             },
             resize: function() {
                 $("main").style.height = window.innerHeight + 'px';
-                $("main").style.width = window.innerHeight * POP.RATIO + 'px';
+                $("main").style.width = window.innerHeight * app.RATIO + 'px';
 
-                POP.currentHeight = window.innerHeight;
-                POP.currentWidth = POP.currentHeight * POP.RATIO;
+                app.currentHeight = window.innerHeight;
+                app.currentWidth = app.currentHeight * app.RATIO;
 
-                if (POP.currentWidth > window.innerWidth) {
-                    POP.currentWidth = window.innerWidth;
+                if (app.currentWidth > window.innerWidth) {
+                    app.currentWidth = window.innerWidth;
 
                 }
                 // this will create some extra space on the
                 // page, allowing us to scroll pass
                 // the address bar, and thus hide it.
-                if (POP.android || POP.ios) {
+                if (app.android || app.ios) {
                     document.body.style.height = (window.innerHeight + 50) + 'px';
                 }
 
                 // set the new canvas style width & height
                 // note: our canvas is still 360x640 but
                 // we're essentially scaling it with CSS
-                POP.canvas.style.width = POP.currentWidth + 'px';
-                POP.canvas.style.height = POP.currentHeight + 'px';
+                app.canvas.style.width = app.currentWidth + 'px';
+                app.canvas.style.height = app.currentHeight + 'px';
 
-                POP.confetti.style.width = POP.currentWidth + 'px';
-                POP.confetti.style.height = POP.currentHeight + 'px';
+                app.confetti.style.width = app.currentWidth + 'px';
+                app.confetti.style.height = app.currentHeight + 'px';
                 
                 // the amount by which the css resized canvas
                 // is different to the actual (360x640) size.
-                POP.scale = POP.currentWidth / POP.WIDTH;
+                app.scale = app.currentWidth / app.WIDTH;
 
                 // position of canvas in relation to
                 // the screen
-                POP.offset.top = POP.canvas.offsetTop;
-                POP.offset.left = POP.canvas.offsetLeft;
+                app.offset.top = app.canvas.offsetTop;
+                app.offset.left = app.canvas.offsetLeft;
 
                 // we use a timeout here as some mobile
                 // browsers won't scroll if there is not
@@ -472,98 +473,103 @@
 
 
                 // decrease our nextBalloon counter
-                POP.nextBalloon -= 1;
+                app.nextBalloon -= 1;
 
                 // if the counter is less than 2 (was 0) 
-                if (POP.nextBalloon < POP.level) {
+                if (app.nextBalloon < app.level) {
                     // put a new instance of balloon into our entities array
-                    POP.entities.push(new POP.Balloon());
+                    app.entities.push(new app.Balloon());
                     // reset the counter with a random value
-                    POP.nextBalloon = (Math.random() * 100) + 100;
+                    app.nextBalloon = (Math.random() * 100) + 100;
                 }
 
                 // Handle touch events 
-                if (POP.Input.tapped) {
-                    if (POP.collides({x: 300, y: 40, r: 20}, {x:POP.Input.x, y:POP.Input.y, r: 7})) {
-                        POP.paused ^= 1;
-                        POP.Input.tapped = false;
-                        if (POP.paused) {
-                            POP.Sound.music.pause();
+                if (app.Input.tapped) {
+                    if (app.collides({x: 300, y: 40, r: 20}, {x:app.Input.x, y:app.Input.y, r: 7})) {
+                        app.paused ^= 1;
+                        app.Input.tapped = false;
+                        if (app.paused) {
+                            app.Sound.music.pause();
                         } else {
-                            POP.Sound.music.play();
+                            app.Sound.music.play();
                         }
                     } else {
-                        POP.score.taps++;
-                        POP.entities.push(new POP.Touch(POP.Input.x, POP.Input.y));
-                        POP.Input.tapped = false;
+                        app.score.taps++;
+                        app.entities.push(new app.Touch(app.Input.x, app.Input.y));
+                        app.Input.tapped = false;
                         checkCollision = true;
                     }
                 }
 
-                POP.clouds.forEach((item, i) => {
+                app.clouds.forEach((item, i) => {
                     item.update();
                     if (item.remove) {
-                        POP.clouds.splice(i, 1);
-                        POP.clouds.push(new POP.Cloud());
+                        app.clouds.splice(i, 1);
+                        app.clouds.push(new app.Cloud());
                     }
                 });
                 
-                POP.state.sunmoon.update();
+                app.state.sunmoon.update();
                 
-                if (POP.state.sunmoon.remove) {
-                    POP.state.sunmoon = new POP.SunMoon();
+                if (app.state.sunmoon.remove) {
+                    app.state.sunmoon = new app.SunMoon();
                 }
 
                 let hadhit = false;
 
                 // cycle through all entities and update as necessary
-                for (i = 0; i < POP.entities.length; i++) {
-                    POP.entities[i].update();
+                for (i = 0; i < app.entities.length; i++) {
+                    app.entities[i].update();
 
-                    if (POP.entities[i].type === 'balloon' && checkCollision) {
-                        hit = POP.collides(POP.entities[i], {
-                            x: POP.Input.x,
-                            y: POP.Input.y,
+                    if (app.entities[i].type === 'balloon' && checkCollision) {
+                        hit = app.collides(app.entities[i], {
+                            x: app.Input.x,
+                            y: app.Input.y,
                             r: 7
                         });
                         if (hit) {
                             hadhit = true;
-                            POP.Sound.play();
+                            app.Sound.play();
                             addConfetti({
-                                x: POP.Input.x,
-                                y: POP.Input.y,
-                                color: POP.entities[i].color
+                                x: app.Input.x,
+                                y: app.Input.y,
+                                color: app.entities[i].color
                             });
 
-                            POP.score.hit += 1;
+                            app.score.hit += 1;
+                            app.Sound.music.playbackRate += 0.005;
+
+                            if (app.Sound.music.playbackRate > 1.2) {
+                                app.Sound.music.playbackRate = 0.6;
+                            }
                         }
 
-                        POP.entities[i].remove = hit;
+                        app.entities[i].remove = hit;
                     }
 
                     // delete from array if remove property
                     // flag is set to true
-                    if (POP.entities[i].remove) {
-                        if (POP.entities[i].type === "balloon") {
-                            POP.score.total++;
+                    if (app.entities[i].remove) {
+                        if (app.entities[i].type === "balloon") {
+                            app.score.total++;
                         }
-                        POP.entities.splice(i, 1);
+                        app.entities.splice(i, 1);
                     }
                 }
                 
                 if (checkCollision && !hadhit) {
-                   POP.score.missed++;
-                    POP.score.escaped++;
+                   app.score.missed++;
+                    app.score.escaped++;
                 }
                 // update wire offset
                 // feel free to play with these values for
                 // either slower or faster wires
-                //POP.wire.time = new Date().getTime() * 0.002;
-                //POP.wire.offset = Math.sin(POP.wire.time * 0.8) * 5;
+                //app.wire.time = new Date().getTime() * 0.002;
+                //app.wire.offset = Math.sin(app.wire.time * 0.8) * 5;
 
                 // calculate accuracy
-                POP.score.accuracy = (POP.score.hit / (POP.score.total + POP.score.missed)) * 100;
-                POP.score.accuracy = isNaN(POP.score.accuracy) ? 0 : ~~(POP.score.accuracy); // a handy way to round floats
+                app.score.accuracy = (app.score.hit / (app.score.total + app.score.missed)) * 100;
+                app.score.accuracy = isNaN(app.score.accuracy) ? 0 : ~~(app.score.accuracy); // a handy way to round floats
 
             },
 
@@ -573,56 +579,53 @@
 
                 let i;
 
-                POP.Draw.rect(0, 0, POP.WIDTH, POP.HEIGHT, POP.bggrad);
-                POP.state.sunmoon.render();
+                app.Draw.rect(0, 0, app.WIDTH, app.HEIGHT, app.bggrad);
+                app.state.sunmoon.render();
 
-                for (i = 0; i < POP.clouds.length; i++) {
-                    POP.clouds[i].render();
+                for (i = 0; i < app.clouds.length; i++) {
+                    app.clouds[i].render();
                 }
 
                 // display snazzy wire effect
-                for (i = 0; i < POP.wire.total; i++) {
-                    POP.Draw.wire(
-                        POP.wire.x + POP.wire.offset + (i * (POP.wire.r * 1.6)),
-                        POP.wire.y + (POP.wire.y * i),
-                        POP.wire.r,
+                for (i = 0; i < app.wire.total; i++) {
+                    app.Draw.wire(
+                        app.wire.x + app.wire.offset + (i * (app.wire.r * 1.6)),
+                        app.wire.y + (app.wire.y * i),
+                        app.wire.r,
                         '#fff');
                 }
 
                 // cycle through all entities and render to canvas
-                for (i = 0; i < POP.entities.length; i += 1) {
-                    POP.entities[i].render();
+                for (i = 0; i < app.entities.length; i += 1) {
+                    app.entities[i].render();
                 }
 
-                POP.ctx.fillStyle = "#00000066";
-                POP.ctx.fillRect(5, 5, 140, 85);
+                app.ctx.fillStyle = "#00000066";
+                app.ctx.fillRect(5, 5, 140, 85);
 
-                POP.ctx.font = "uppercase 22px 'Titan One'";
+                app.ctx.font = "uppercase 22px 'Titan One'";
                 // display scores
-                POP.Draw.text(`${POP.score.hit}`, 20, 30, 30, "#eee", "'Titan One'");
+                app.Draw.text(`${app.score.hit}`, 20, 30, 30, "#eee", "'Titan One'");
 
-                // POP.Draw.text(`${POP.score.escaped}`, 20, 50, 20, "#fff", "'Titan One'");
-                POP.Draw.text(`${POP.score.accuracy}%`, 20, 70, 20, "#fff", "'Titan One'");
+                // app.Draw.text(`${app.score.escaped}`, 20, 50, 20, "#fff", "'Titan One'");
+                app.Draw.text(`${app.score.accuracy}%`, 20, 70, 20, "#fff", "'Titan One'");
                 
-                if (POP.paused) {
-                    POP.Draw.text(String.fromCharCode(52), 260, 60, 64, "#fff", "Webdings");
+                if (app.paused) {
+                    app.Draw.text(String.fromCharCode(52), 260, 60, 64, "#fff", "Webdings");
                 } else {
-                    POP.Draw.text(String.fromCharCode(59), 260, 60, 64, "#fff", "Webdings");
+                    app.Draw.text(String.fromCharCode(59), 260, 60, 64, "#fff", "Webdings");
                 }
 
             },
 
 
-            // the actual loop
-            // requests animation frame
-            // then proceeds to update
-            // and render
+            // main loop
             loop: function() {
-                if (!POP.paused) {
-                    requestAnimFrame(POP.loop);
+                if (!app.paused) {
+                    requestAnimFrame(app.loop);
 
-                    POP.update();
-                    POP.render();
+                    app.update();
+                    app.render();
                 }
             }
 
@@ -630,7 +633,7 @@
         };
 
         // checks if two entities are touching
-        POP.collides = function(a, b) {
+        app.collides = function(a, b) {
 
             var distance_squared = (((a.x - b.x) * (a.x - b.x)) +
                 ((a.y - b.y) * (a.y - b.y)));
@@ -647,50 +650,50 @@
 
         // abstracts various canvas operations into
         // standalone functions
-        POP.Draw = {
+        app.Draw = {
 
             clear: function() {
-                POP.ctx.clearRect(0, 0, POP.WIDTH, POP.HEIGHT);
+                app.ctx.clearRect(0, 0, app.WIDTH, app.HEIGHT);
             },
 
 
             rect: function(x, y, w, h, col) {
-                POP.ctx.fillStyle = col;
-                POP.ctx.fillRect(x, y, w, h);
-                //POP.ctx.drawImage(POP.CLOUD, 100, 100, 300, 200);
+                app.ctx.fillStyle = col;
+                app.ctx.fillRect(x, y, w, h);
+                //app.ctx.drawImage(app.CLOUD, 100, 100, 300, 200);
             },
 
             circle: function(x, y, r, col) {
-                POP.ctx.fillStyle = col;
-                POP.ctx.beginPath();
-                POP.ctx.arc(x + 5, y + 5, r, 0, Math.PI * 2, true);
-                POP.ctx.closePath();
-                POP.ctx.fill();
+                app.ctx.fillStyle = col;
+                app.ctx.beginPath();
+                app.ctx.arc(x + 5, y + 5, r, 0, Math.PI * 2, true);
+                app.ctx.closePath();
+                app.ctx.fill();
             },
 
             wire: function(x, y, r, col) {
-                POP.ctx.fillStyle = col;
-                POP.ctx.beginPath();
-                POP.ctx.lineWidth = 1;
-                POP.ctx.arc(x + 5, y + 50, r, Math.PI / 1.25, Math.PI / 5, true);
-                POP.ctx.arc(x + 5, y + 80, r, Math.PI / 1.25, Math.PI / 5, true);
-                POP.ctx.stroke();
+                app.ctx.fillStyle = col;
+                app.ctx.beginPath();
+                app.ctx.lineWidth = 1;
+                app.ctx.arc(x + 5, y + 50, r, Math.PI / 1.25, Math.PI / 5, true);
+                app.ctx.arc(x + 5, y + 80, r, Math.PI / 1.25, Math.PI / 5, true);
+                app.ctx.stroke();
             },
 
             text: function(string, x, y, size, col, font="Monospace") {
 
-                POP.ctx.font = `${size}px ${font}`;
-                POP.ctx.fillStyle = "#000000";
-                POP.ctx.fillText(string, x + 1, y + 1);
+                app.ctx.font = `${size}px ${font}`;
+                app.ctx.fillStyle = "#000000";
+                app.ctx.fillText(string, x + 1, y + 1);
 
-                POP.ctx.fillStyle = col;
-                POP.ctx.fillText(string, x, y);
+                app.ctx.fillStyle = col;
+                app.ctx.fillText(string, x, y);
             }
 
         };
 
 
-        POP.Sound = {
+        app.Sound = {
             pops: [ new Audio("sounds/pop1.mp3"), new Audio("sounds/pop2.mp3"), new Audio("sounds/pop3.mp3") ],
             music: new Audio("sounds/polka.mp3"),
             play: function() {
@@ -699,7 +702,7 @@
         };
 
 
-        POP.Input = {
+        app.Input = {
 
             x: 0,
             y: 0,
@@ -708,15 +711,15 @@
             set: function(data) {
                 data.offsetX = (data.offsetX) ? data.offsetX : data.clientX;
                 data.offsetY = (data.offsetY) ? data.offsetY : data.clientY;
-                this.x = (data.offsetX - POP.offset.left) / POP.scale;
-                this.y = (data.offsetY - POP.offset.top) / POP.scale;
+                this.x = (data.offsetX - app.offset.left) / app.scale;
+                this.y = (data.offsetY - app.offset.top) / app.scale;
                 this.tapped = true;
 
             }
 
         };
 
-        POP.Touch = function(x, y) {
+        app.Touch = function(x, y) {
 
             this.type = 'touch'; // we'll need this later
             this.x = x; // the x coordinate
@@ -724,7 +727,7 @@
             this.r = 5; // the radius
             this.opacity = 1; // initial opacity. the dot will fade out
             this.fade = 0.05; // amount by which to fade on each game tick
-            // this.remove = false;    // flag for removing this entity. POP.update
+            // this.remove = false;    // flag for removing this entity. app.update
             // will take care of this
 
             this.update = function() {
@@ -735,12 +738,12 @@
             };
 
             this.render = function() {
-                POP.Draw.circle(this.x, this.y, this.r, 'rgba(255,255,255,' + this.opacity + ')');
+                app.Draw.circle(this.x, this.y, this.r, 'rgba(255,255,255,' + this.opacity + ')');
             };
 
         };
 
-        POP.SunMoon = function() {
+        app.SunMoon = function() {
             this.hour = new Date().getHours();
             this.rand = Math.random();
             
@@ -755,38 +758,38 @@
             this.img.src = (this.night) ? "moon2.png" : "sun2.png";
 
             this.x = -this.width / 2;
-            this.y = ~~(Math.random() * (POP.HEIGHT - this.height));
+            this.y = ~~(Math.random() * (app.HEIGHT - this.height));
             
             this.velX = (Math.random() * (Math.random() * .25));// / 100;
             this.velY = ((Math.random() * .25) + .25 ) / 100;
             
-            this.velY *= (this.y < (POP.currentHeight / 2)) ? 1 : -1;
+            this.velY *= (this.y < (app.currentHeight / 2)) ? 1 : -1;
 
             this.update = function() {
                 this.x += this.velX;
                 this.y += this.velY;
 
-                this.remove = ((this.x > POP.WIDTH) || (this.y > POP.HEIGHT) || (this.x < -this.width) || (this.y < -this.height)) ? true : false;
+                this.remove = ((this.x > app.WIDTH) || (this.y > app.HEIGHT) || (this.x < -this.width) || (this.y < -this.height)) ? true : false;
             };
 
             this.render = function() {
-                POP.ctx.save();
-                POP.ctx.globalAlpha = 0.6;
-                POP.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-                POP.ctx.restore();
+                app.ctx.save();
+                app.ctx.globalAlpha = 0.6;
+                app.ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+                app.ctx.restore();
             };
         };
 
 
 
-        POP.Cloud = function(r=false) {
+        app.Cloud = function(r=false) {
             this.rand = Math.random();
             this.scale = this.rand + .25;
             this.width = 300 * this.scale;
             this.height = 200 * this.scale;
 
-            this.x = (r) ? ~~(this.rand * POP.currentWidth) : -this.width;
-            this.y = ~~(this.rand * (POP.HEIGHT - this.height));
+            this.x = (r) ? ~~(this.rand * app.currentWidth) : -this.width;
+            this.y = ~~(this.rand * (app.HEIGHT - this.height));
             
             this.velX = this.rand * this.rand;
             this.velY = 0;
@@ -795,42 +798,42 @@
                 this.x += this.velX;
                 this.y += this.velY;
 
-                this.remove = ((this.x > POP.WIDTH) || (this.y > POP.HEIGHT) || (this.x < -this.width) || (this.y < -this.height)) ? true : false;
+                this.remove = ((this.x > app.WIDTH) || (this.y > app.HEIGHT) || (this.x < -this.width) || (this.y < -this.height)) ? true : false;
             };
 
             this.render = function() {
-                POP.ctx.save();
-                POP.ctx.globalAlpha = 0.4;
-                POP.ctx.drawImage(POP.CLOUD, this.x, this.y, this.width, this.height);
-                POP.ctx.restore();
+                app.ctx.save();
+                app.ctx.globalAlpha = 0.4;
+                app.ctx.drawImage(app.CLOUD, this.x, this.y, this.width, this.height);
+                app.ctx.restore();
             };
         };
 
-        POP.Balloon = function() {
+        app.Balloon = function() {
             this.type = 'balloon';
 
-            this.r = (Math.random() * 30) + (30 / POP.level);
+            this.r = (Math.random() * 30) + (30 / app.level);
             this.speed = (Math.random() * 2) + .25;
             this.rando = Math.floor(Math.random() * colorlist.length);
             this.color = colorlist[this.rando];
             this.balloon = colors[colorlist[this.rando]];
             
-            this.x = ~~(Math.random() * (POP.WIDTH - (this.r * 2)) + this.r);
-            this.y = ~~(POP.HEIGHT + (Math.random() * 100) + 100);
+            this.x = ~~(Math.random() * (app.WIDTH - (this.r * 2)) + this.r);
+            this.y = ~~(app.HEIGHT + (Math.random() * 100) + 100);
             this.offset = ~~(Math.random() * 10000);
 
             // console.log(`New balloon with color ${this.basecolor}`);
 
             // the amount by which the balloon
             // will move from side to side
-            this.waveSize = Math.floor(Math.random() * (5 * POP.level)) + (this.r / 2);
+            this.waveSize = Math.floor(Math.random() * (5 * app.level)) + (this.r / 2);
             // we need to remember the original
             // x position for our sine wave calculation
             this.xConstant = this.x;
 
             this.remove = false;
-            // this.image = POP.balloons[Math.floor(Math.random() * POP.balloons.length)];
-            this.image = POP.balloons[this.rando];
+            // this.image = app.balloons[Math.floor(Math.random() * app.balloons.length)];
+            this.image = app.balloons[this.rando];
 
             this.update = function() {
 
@@ -843,7 +846,7 @@
 
                 // if offscreen flag for removal
                 if (this.y < -10) {
-                    POP.score.escaped += 1; // update score
+                    app.score.escaped += 1; // update score
                     this.remove = true;
                 }
 
@@ -851,16 +854,16 @@
 
             this.render = function() {
 
-                POP.ctx.save();
-                POP.ctx.globalAlpha = 0.8;
-                //                POP.Draw.circle(this.x, this.y, this.r, this.color);
-                POP.ctx.drawImage(this.image, 0, 0, this.balloon.img.width, this.balloon.img.height, this.x - this.r + 5, this.y - this.r + 5, this.r * 2, ((this.r * 2) / 341) * 443);
-                POP.ctx.restore();
+                app.ctx.save();
+                app.ctx.globalAlpha = 0.8;
+                //                app.Draw.circle(this.x, this.y, this.r, this.color);
+                app.ctx.drawImage(this.image, 0, 0, this.balloon.img.width, this.balloon.img.height, this.x - this.r + 5, this.y - this.r + 5, this.r * 2, ((this.r * 2) / 341) * 443);
+                app.ctx.restore();
             };
 
         };
 
-        POP.Particle = function(x, y, r, col) {
+        app.Particle = function(x, y, r, col) {
 
             this.x = x;
             this.y = y;
@@ -900,7 +903,7 @@
                 this.r = (this.r > 0.05) ? this.r - 0.05 : 0;
 
                 // offscreen
-                if ((!this.r) || (this.y < 0) || (this.y > POP.currentHeight)) {
+                if ((!this.r) || (this.y < 0) || (this.y > app.currentHeight)) {
                     this.remove = true;
                 }
 
@@ -908,13 +911,13 @@
 
 
             this.render = function() {
-                POP.Draw.circle(this.x, this.y, this.r, this.col);
+                app.Draw.circle(this.x, this.y, this.r, this.col);
             };
 
         };
 
-        window.addEventListener('load', POP.init, false);
-        window.addEventListener('resize', POP.resize, false);
+        window.addEventListener('load', app.init, false);
+        window.addEventListener('resize', app.resize, false);
     </script>
     <script>
         // helper
@@ -1008,7 +1011,7 @@
         }
 
         function updateConfetti() {
-            confettiCtx.clearRect(0, 0, POP.WIDTH, POP.HEIGHT);
+            confettiCtx.clearRect(0, 0, app.WIDTH, app.HEIGHT);
 
             confettiElements.forEach((c, i) => {
                 c.render();
@@ -1025,16 +1028,16 @@
 
         function setupCanvas() {
             confettiCtx = $("#confetti").getContext('2d');
-            POP.confetti.style.width = POP.currentWidth + 'px';
-            POP.confetti.style.height = POP.currentHeight + 'px';
+            app.confetti.style.width = app.currentWidth + 'px';
+            app.confetti.style.height = app.currentHeight + 'px';
 
             const box = $("#confetti").getBoundingClientRect();
 
             container = {
                 x: box.left,
                 y: box.top,
-                w: POP.WIDTH,
-                h: POP.HEIGHT
+                w: app.WIDTH,
+                h: app.HEIGHT
             };
        }
 
@@ -1057,8 +1060,8 @@
                 }
             } else {
                 clickPosition = [
-                    POP.WIDTH * Math.random(),
-                    POP.HEIGHT * Math.random()
+                    app.WIDTH * Math.random(),
+                    app.HEIGHT * Math.random()
                 ];
             }
             for (let i = 0; i < confettiParams.number; i++) {
