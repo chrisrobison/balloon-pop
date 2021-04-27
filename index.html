@@ -228,9 +228,9 @@
                 back: '#aaaaaa',
                 color: 'ufo',
                 img: {
-                    src: 'balloon_ufo.png',
-                    width:500,
-                    height:500
+                    src: 'ufo.png',
+                    width:422,
+                    height:180
                 }
 
             },
@@ -342,7 +342,14 @@
                 app.ios = (app.ua.indexOf('iphone') > -1 || app.ua.indexOf('ipad') > -1) ? true : false;
 
                 app.balloons = [];
-
+                app.ufos = [];
+                
+                for (let i = 1; i < 11; i++) {
+                    let img = new Image();
+                    img.info = colors['ufo'];
+                    img.src = `ufo/ufo${i}.png`;
+                    app.ufos.push(img);
+                }
                 for (let i = 0; i < colorlist.length; i++) {
                     app.balloons[i] = new Image();
                     app.balloons[i].info = colors[colorlist[i]];
@@ -464,19 +471,16 @@
                 }, 1);
             },
 
-            // this is where all entities will be moved
-            // and checked for collisions etc
             update: function() {
-                var i,
-                    checkCollision = false; // we only need to check for a collision
-                // if the user tapped on this game tick
+                var i, checkCollision = false; // we only need to check for a collision
+                                               // if the user tapped on this game tick
 
 
                 // decrease our nextBalloon counter
                 app.nextBalloon -= 1;
 
                 // if the counter is less than 2 (was 0) 
-                if (app.nextBalloon < app.level) {
+                if (app.nextBalloon < (app.level * 10)) {
                     // put a new instance of balloon into our entities array
                     app.entities.push(new app.Balloon());
                     // reset the counter with a random value
@@ -818,6 +822,7 @@
             this.color = colorlist[this.rando];
             this.balloon = colors[colorlist[this.rando]];
             
+            this.idx = ~~(Math.random() * 8);
             this.x = ~~(Math.random() * (app.WIDTH - (this.r * 2)) + this.r);
             this.y = ~~(app.HEIGHT + (Math.random() * 100) + 100);
             this.offset = ~~(Math.random() * 10000);
@@ -834,6 +839,7 @@
             this.remove = false;
             // this.image = app.balloons[Math.floor(Math.random() * app.balloons.length)];
             this.image = app.balloons[this.rando];
+            this.time = new Date().getTime();
 
             this.update = function() {
 
@@ -850,14 +856,31 @@
                     this.remove = true;
                 }
 
+                if (this.color == 'ufo') {
+                    this.idx += .25;
+                    let now = new Date().getTime();
+                    if (now - this.time > 100) {
+                    }
+                    if (this.idx > 8) {
+                        this.idx = 0;
+                    }
+                    this.time = new Date().getTime();
+                }
             };
 
             this.render = function() {
 
                 app.ctx.save();
-                app.ctx.globalAlpha = 0.8;
                 //                app.Draw.circle(this.x, this.y, this.r, this.color);
-                app.ctx.drawImage(this.image, 0, 0, this.balloon.img.width, this.balloon.img.height, this.x - this.r + 5, this.y - this.r + 5, this.r * 2, ((this.r * 2) / 341) * 443);
+                if (this.color == 'ufo') {
+                    app.ctx.globalAlpha = 1;
+                    app.ctx.drawImage(this.image, 
+                        0, (176 * ~~this.idx), 423, 176, 
+                        this.x - this.r + 5, this.y - this.r + 5, 211, 83);
+                } else {
+                    app.ctx.globalAlpha = 0.8;
+                    app.ctx.drawImage(this.image, 0, 0, this.balloon.img.width, this.balloon.img.height, this.x - this.r + 5, this.y - this.r + 5, this.r * 2, ((this.r * 2) / 341) * 443);
+                }
                 app.ctx.restore();
             };
 
@@ -929,13 +952,13 @@
             number: 40,
             // min and max size for each rectangle
             size: {
-                x: [3, 20],
-                y: [3, 20]
+                x: [5, 20],
+                y: [5, 20]
             },
             // power of explosion
-            initSpeed: 20,
+            initSpeed: 25,
             // defines how fast particles go down after blast-off
-            gravity: 0.65,
+            gravity: 0.25,
             // how wide is explosion
             drag: 0.08,
             // how slow particles are falling
