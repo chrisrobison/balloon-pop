@@ -2,9 +2,12 @@
 <html lang="en">
 
 <head>
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width, user-scalable=no, minimal-ui">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="full-screen" content="yes" />
+    <meta name="screen-orientation" content="portrait" />
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Titan+One&display=swap" rel="stylesheet">
     <style type="text/css">
@@ -36,6 +39,7 @@
             position: relative;
             text-align: center;
             margin: 0 auto;
+            overflow:hidden;
         }
         .webdings {
             font-family: "Webdings", cursive;
@@ -59,7 +63,17 @@
         #banner:hover {
            font-size: 56px; 
         }
+        
+        #paused {
+            display:flex;
+            position:absolute;
+            top:0px;
+            right:0px;
+            left:0px;
+            background-color:#0006;
+            text-align: center;
 
+        }
         @keyframes wave {
             0% {
                 transform: translatey(0px);
@@ -307,6 +321,9 @@
                 app.SUNMOON = new Image();
                 app.SUNMOON.src = (app.state.night) ? "moon2.png" : "sun2.png";
 
+                app.DART = new Image();
+                app.DART.src = "dart.png";
+
                 app.paused = 0;
 
                 // the proportion of width to height
@@ -418,6 +435,9 @@
                 app.Sound.music.loop = true;
                 app.Sound.music.playbackRate = 0.6;
                 app.Sound.music.play();
+
+                app.Sound.pops = [ new Audio("sounds/pop1.mp3"), new Audio("sounds/pop2.mp3"), new Audio("sounds/pop3.mp3") ];
+
             },
             gameover: function() {
                 window.removeEventListener('click', app.doclick, {passive:false } );
@@ -471,10 +491,8 @@
                 }, 1);
             },
 
-            update: function() {
-                var i, checkCollision = false; // we only need to check for a collision
-                                               // if the user tapped on this game tick
-
+            update: function(check=false) {
+                var i, checkCollision = check;
 
                 // decrease our nextBalloon counter
                 app.nextBalloon -= 1;
@@ -501,7 +519,13 @@
                         app.score.taps++;
                         app.entities.push(new app.Touch(app.Input.x, app.Input.y));
                         app.Input.tapped = false;
-                        checkCollision = true;
+                        if (!checkCollision) {
+                            setTimeout(function() { 
+                                // app.Input.tapped = true;
+                                app.update(true); 
+                            }, 300);
+                        }
+                        checkCollision = check;
                     }
                 }
 
@@ -522,7 +546,7 @@
                 let hadhit = false;
 
                 // cycle through all entities and update as necessary
-                for (i = 0; i < app.entities.length; i++) {
+                for (let i = 0; i < app.entities.length; i++) {
                     app.entities[i].update();
 
                     if (app.entities[i].type === 'balloon' && checkCollision) {
@@ -724,25 +748,41 @@
         };
 
         app.Touch = function(x, y) {
+            this.img = app.DART;
 
-            this.type = 'touch'; // we'll need this later
-            this.x = x; // the x coordinate
-            this.y = y; // the y coordinate
-            this.r = 5; // the radius
-            this.opacity = 1; // initial opacity. the dot will fade out
-            this.fade = 0.05; // amount by which to fade on each game tick
-            // this.remove = false;    // flag for removing this entity. app.update
-            // will take care of this
+            this.type = 'touch'; 
+            this.width = this.img.width;
+            this.height = this.img.height;
+            
+            this.x = x;         
+            this.y = y;         
+            this.r = 5;         
+
+            this.opacity = 1;       // initial opacity. the dot will fade out
+            this.fade = 0.05;       // amount by which to fade on each game tick
+            
+            this.scale = 1;
+            this.shrink = 0.98;       // amount by which to fade on each game tick
+
+            // this.remove = false;  
+                                   
 
             this.update = function() {
                 // reduce the opacity accordingly
-                this.opacity -= this.fade;
+                // this.opacity -= this.fade;
+                this.scale *= this.shrink;
+                
+                this.width *= this.scale;
+                this.height *= this.scale;
+                this.r *= this.scale;
+
                 // if opacity if 0 or less, flag for removal
-                this.remove = (this.opacity < 0) ? true : false;
+                this.remove = (this.width < 1) ? true : false;
             };
 
             this.render = function() {
-                app.Draw.circle(this.x, this.y, this.r, 'rgba(255,255,255,' + this.opacity + ')');
+                app.Draw.circle(this.x - (this.r), this.y - (this.r ), this.r, '#fff9');
+                app.ctx.drawImage(this.img, this.x - (this.width / 2), this.y + (this.height), this.width, this.height);
             };
 
         };
